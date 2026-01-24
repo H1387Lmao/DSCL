@@ -1,0 +1,3 @@
+cmd hello(User: person){
+	respond("Hi%s" % person)
+}
