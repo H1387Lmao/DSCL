@@ -1,5 +1,6 @@
 from src.lexer import *
 from src.parser import *
+from src.codegen import *
 
 import sys
 import argparse
@@ -7,6 +8,7 @@ import argparse
 argparser = argparse.ArgumentParser()
 argparser.add_argument(nargs="?", dest="i")
 argparser.add_argument("-o", "-output")
+argparser.add_argument("-db", "-debug", dest='db', action="store_true")
 
 args = argparser.parse_args()
 
@@ -20,4 +22,16 @@ else:
         o.read()
     )
     o.close()
-    print(ast)
+    print(ast) if args.db else 0
+
+if args.o:
+    target = args.o
+else:
+    target = ".".join(args.i.split(".")[:-1])+'.py'
+
+res = BaseGenerator(ast).compile()
+o = open(target, "w")
+o.write(res)
+o.close()
+
+print(f"[{Green}COMPILED{Reset}] Successfully wrote {len(res.split("\n"))} lines to {target}")

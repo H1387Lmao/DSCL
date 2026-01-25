@@ -1,15 +1,24 @@
-use discord
+use pkg discord
+import random
 
 const intents = new Intents()
+const prefix = "!"
+const TOKEN = "MY_VERY_SECRET_TOKEN"
+
 intents->on_messages=True
 
 const bot = new Bot(
-	"prefix ",
+	prefix,
 	intents
 )
 
-cmd hello(User: person){
-	bot->respond("Hi%s" % person)
+cmd hello(User: person) -> bot{
+	this->respond("Hi%s" % person)
 }
 
-bot->run("Hi")
+cmd roll_dice(num: min, num: max) -> bot{
+	mut number = random->randint(min, max)
+	this->respond("Your random number is: %s" % number)
+}
+
+bot->run(TOKEN)

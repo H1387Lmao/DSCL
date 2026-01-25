@@ -5,12 +5,16 @@ tokens = (
     'ID', 'STR', 'NUM', 'FLT',
 )
 
-keywords = ('cmd',
-            'User', 
-            'str', 
-            'num', 
-            "const", "mut",
-            "new", "use")
+keywords = (
+    'cmd',
+    'fn',
+    'User', 
+    'str', 
+    'num', 
+    'const', 'mut',
+    'new',
+    'import', 'use', 'pkg'
+)
 
 for kw in keywords:
     tokens += (kw,)
@@ -26,7 +30,7 @@ symbols = {
     "->": "ARROW",
     ",": "COMMA",
     " ()": "PAREN",
-    " {}": "BRACE"
+    f" {'{}'}": "BRACE"
 }
 
 for k,v in symbols.items():
@@ -38,7 +42,6 @@ for k,v in symbols.items():
         for i,c in enumerate(k.strip()):
             globals()['t_' + cs[i]+v] = re.escape(k.strip()[i])
             tokens+=(cs[i]+v,)
-            print(i,c)
 t_ignore = ' \t'
 
 def t_FLT(t):

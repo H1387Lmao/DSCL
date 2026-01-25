@@ -11,14 +11,15 @@ Purple=Ansi+"94m"
 Reset=Ansi+"0m"
 Gray=Ansi+"90m"
 
-def AstView(node, prefix="", is_last=True):
+def AstView(node, prefix="", is_last=True, ITEM_NAME=None):
     if not isinstance(node, Ast):
         return ""
 
     res = prefix
+    name = ITEM_NAME+": " if ITEM_NAME is not None else ""
     if prefix:
         res += f"{Gray}└── {Reset}" if is_last else f"{Gray}├── {Reset}"
-    res += f"{Blue}Ast({node.n}){Reset}\n"
+    res += f"{Blue}{name}Ast({node.n}){Reset}\n"
 
     child_prefix = prefix + ("    " if is_last else f"{Gray}│   {Reset}")
 
@@ -28,7 +29,7 @@ def AstView(node, prefix="", is_last=True):
         last = i == len(items) - 1
 
         if isinstance(v, Ast):
-            res += AstView(v, child_prefix, last)
+            res += AstView(v, child_prefix, last, ITEM_NAME=k)
 
         elif isinstance(v, list):
             res += child_prefix
@@ -70,9 +71,9 @@ def p_prog(p):
 
 def p_cmd_def(p):
     """
-    stmt : cmd ID LPAREN params RPAREN scope
+    stmt : cmd ID LPAREN params RPAREN ARROW ID scope
     """
-    p[0] = Ast('cmd_decl', name=p[2], args=p[4], stmts=p[6])
+    p[0] = Ast('cmd_decl', name=p[2], args=p[4], stmts=p[8], target=p[7])
 
 def p_call(p):
     """
@@ -185,12 +186,18 @@ def p_expr_binop(p):
 def p_expr_value(p):
     """
     expr : ID
-         | STR
+         | STRING
          | NUM
          | FLT
          | getattr
     """
     p[0] = p[1]
+
+def p_expr_string(p):
+    """
+    STRING : STR
+    """
+    p[0] = Ast("string", value=p[1])
 
 def p_assign(p):
     """
@@ -236,13 +243,22 @@ def p_setattr(p):
         value=p[3]
     )
 
-def p_use(p):
+def p_import(p):
     """
-    stmt : use ID
+    stmt : import ID
     """
     p[0]=Ast(
         "import",
         target=p[2]
+    )
+
+def p_use_pkg(p):
+    """
+    stmt : use pkg ID
+    """
+    p[0]=Ast(
+        "usepkg",
+        target=p[3]
     )
 
 def p_error(p):
