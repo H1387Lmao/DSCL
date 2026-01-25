@@ -1,3 +1,15 @@
+use discord
+
+const intents = new Intents()
+intents->on_messages=True
+
+const bot = new Bot(
+	"prefix ",
+	intents
+)
+
 cmd hello(User: person){
-	respond("Hi%s" % person)
+	bot->respond("Hi%s" % person)
 }
+
+bot->run("Hi")

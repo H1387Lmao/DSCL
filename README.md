@@ -18,6 +18,14 @@ There are some examples found in the examples folder
 python main.py examples/hello.dscl -o bin/hello.py
 ```
 
-### Had to use AI For some parts of this program because git deleted my entire progress and i had to start from square one, WHY IS -F EVEN AN OPTION
+## Notes
 
+Had to use AI For some parts of this program because git deleted my entire progress and i had to start from square one, WHY IS -F EVEN AN OPTION
 Dont worry ill replace the AI Parts when i really need performance fixes
+
+|-------------------------|
+|Features to add          |
+|-------------------------|
+|Transpiler for Pycord    |
+|Components V2 Integration|
+|Better syntax (hopefully)|
