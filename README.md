@@ -15,6 +15,33 @@ pip install -r requirements
 There are some examples found in the examples folder,
 including a result built by codegen.py
 
+```rust
+use pkg discord
+import random
+
+const intents = new Intents()
+const prefix = "!"
+const TOKEN = "MY_VERY_SECRET_TOKEN"
+
+intents->on_messages=True
+
+const bot = new Bot(
+	prefix,
+	intents
+)
+
+cmd hello(User: person) -> bot{
+	this->respond("Hi%s" % person)
+}
+
+cmd roll_dice(num: min, num: max) -> bot{
+	mut number = random->randint(min, max)
+	this->respond("Your random number is: %s" % number)
+}
+
+bot->run(TOKEN)
+```
+
 ## Different modes
 
 To use the compiler mode, run with a `-o` option
