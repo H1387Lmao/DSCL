@@ -1,6 +1,10 @@
 # DSCL (Programming Language)
+[![DSCL - Website](https://img.shields.io/badge/DSCL-Website-blueviolet)](https://h1387lmao.github.io/DSCL)
+[![dependency - ply](https://img.shields.io/badge/dependency-ply-blue?logo=python&logoColor=white)](https://pypi.org/project/ply)
+![License](https://img.shields.io/badge/License-None-green)
 
-DSCL is a programming language for making discord bots
+
+[DSCL](https://h1387lmao.github.io/DSCL) is a programming language for making discord bots
 
 ## Installation
 
@@ -15,33 +19,6 @@ pip install -r requirements
 There are some examples found in the examples folder,
 including a result built by codegen.py
 
-```rust
-use pkg discord
-import random
-
-const intents = new Intents()
-const prefix = "!"
-const TOKEN = "MY_VERY_SECRET_TOKEN"
-
-intents->on_messages=True
-
-const bot = new Bot(
-	prefix,
-	intents
-)
-
-cmd hello(User: person) -> bot{
-	this->respond("Hi%s" % person)
-}
-
-cmd roll_dice(num: min, num: max) -> bot{
-	mut number = random->randint(min, max)
-	this->respond("Your random number is: %s" % number)
-}
-
-bot->run(TOKEN)
-```
-
 ## Different modes
 
 To use the compiler mode, run with a `-o` option
@@ -50,7 +27,6 @@ To use the compiler mode, run with a `-o` option
 python main.py examples/hello.dscl -o bin/hello.py
 ```
 
-> [!NOTE]
 > Interpreter mode is not yet implemented
 > it will default to the compiler option!
 > please keep mind of this

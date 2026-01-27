@@ -36,7 +36,10 @@
             <pre class="p-6 overflow-x-auto"><code class="language-rust">use pkg discord
 import random
 
-const bot = new Bot("!", new Intents(on_messages=True))
+const intents = new Intents()
+intents->on_message=True
+
+const bot = new Bot("!", intents)
 
 cmd roll_dice(num: min, num: max) -> bot {
     mut number = random->randint(min, max)
