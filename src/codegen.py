@@ -83,6 +83,7 @@ class BaseGenerator:
 		return res.removesuffix(", ")
 
 	def compile_statement(self, stmt):
+		print(stmt)
 		match stmt.n:
 			case "import":
 				self._add_line(f"import {stmt.target}")

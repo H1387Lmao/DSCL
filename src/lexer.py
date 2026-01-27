@@ -13,7 +13,7 @@ keywords = (
     'num', 
     'const', 'mut',
     'new',
-    'import', 'use', 'pkg'
+    'use', 'pkg'
 )
 
 for kw in keywords:
@@ -30,7 +30,8 @@ symbols = {
     "->": "ARROW",
     ",": "COMMA",
     " ()": "PAREN",
-    f" {'{}'}": "BRACE"
+    f" {'{}'}": "BRACE",
+    "::": "DOUBLECOLON"
 }
 
 for k,v in symbols.items():

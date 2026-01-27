@@ -1,5 +1,5 @@
-use pkg discord
-import random
+use pkg::discord
+use random
 
 const intents = new Intents()
 const prefix = "!"

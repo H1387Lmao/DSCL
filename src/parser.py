@@ -245,7 +245,7 @@ def p_setattr(p):
 
 def p_import(p):
     """
-    stmt : import ID
+    stmt : use ID
     """
     p[0]=Ast(
         "import",
@@ -254,11 +254,11 @@ def p_import(p):
 
 def p_use_pkg(p):
     """
-    stmt : use pkg ID
+    stmt : use pkg DOUBLECOLON ID
     """
     p[0]=Ast(
         "usepkg",
-        target=p[3]
+        target=p[4]
     )
 
 def p_error(p):

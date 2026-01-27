@@ -27,10 +27,15 @@ else:
 if args.o:
     target = args.o
 else:
-    target = ".".join(args.i.split(".")[:-1])+'.py'
+    if args.i:
+        target = ".".join(args.i.split(".")[:-1])+'.py'
+    else:
+        target = None
 
-res = BaseGenerator(ast).compile()
-o = open(target, "w")
+if ast:
+    res = BaseGenerator(ast).compile()
+if target:
+    o = open(target, "w")
 o.write(res)
 o.close()
 
