@@ -6,39 +6,69 @@
     <title>DSCL | Discord Bot Programming Language</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+    <style>
+        html { scroll-behavior: smooth; }
+        /* Optional: Add a smooth fade-in for the dropdown */
+        #mobile-menu:not(.hidden) {
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body class="bg-[#1a1c1e] text-gray-200 font-sans">
 
-    <nav class="flex justify-betweem items-center px-8 py-6 max-w-6xl mx-auto">
-        <h1 class="text-2xl font-bold tracking-tighter text-white">DSCL
-        	<span class="text-blue-500">_
-        	<span class="text-2m font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-yellow-400">v1.01        </span>
-        </h1>
-        <div class="space-x-6 text-sm font-medium">
-            <a href="#features" class="hover:text-blue-400 transition">Features</a>
-            <a href="#install" class="hover:text-blue-400 transition">Install</a>
-            <a href="#examples" class="hover:text-blue-400 transition">Examples</a>
-            <a href="https://github.com/H1387Lmao/DSCL" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition">GitHub</a>
-        </div>
-    </nav>
+    <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">
+        <nav class="flex justify-between items-center px-8 py-6 max-w-6xl mx-auto">
+            <h1 class="text-2xl font-bold tracking-tighter text-white">
+                DSCL<span class="text-blue-500">_</span><span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-yellow-400">v1.01</span>
+            </h1>
 
-    <header class="max-w-6xl mx-auto px-8 py-20 text-center">
-        <h2 class="text-5xl md:text-7xl font-extrabold text-white mb-6">Build Discord Bots 
-        <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">with DSCL</span></h2>
-        <p class="text-gray-400 text-lg max-w-2xl mx-auto mb-10">
-            A high-level language designed specifically for Discord bot development. Write clean code that transpiles directly to Python.
-        </p>
+            <div class="hidden md:flex space-x-6 text-sm font-medium items-center">
+                <a href="#features" class="hover:text-blue-400 transition">Features</a>
+                <a href="#install" class="hover:text-blue-400 transition">Install</a>
+                <a href="#examples" class="hover:text-blue-400 transition">Examples</a>
+                <a href="https://github.com/H1387Lmao/DSCL" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition">GitHub</a>
+            </div>
+
+            <button id="menu-toggle" class="md:hidden text-white focus:outline-none">
+                <svg id="menu-icon" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </nav>
+
+        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-[#1e2024] border-b border-blue-500/20 shadow-2xl md:hidden">
+            <div class="flex flex-col p-6 space-y-4">
+                <a href="#features" class="nav-link text-gray-300 hover:text-blue-400 transition py-2">Features</a>
+                <a href="#install" class="nav-link text-gray-300 hover:text-blue-400 transition py-2">Install</a>
+                <a href="#examples" class="nav-link text-gray-300 hover:text-blue-400 transition py-2">Examples</a>
+                <hr class="border-gray-800">
+                <a href="https://github.com/H1387Lmao/DSCL" class="nav-link text-blue-400 font-bold py-2">View on GitHub</a>
+            </div>
+        </div>
     </header>
 
-    <section id="examples" class="max-w-4xl mx-auto px-8 pb-20">
-        <div class="bg-[#24262b] rounded-xl shadow-2xl overflow-hidden border border-gray-700">
-            <div class="flex items-center space-x-2 px-4 py-3 bg-[#1e2024] border-b border-gray-700">
-                <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                <span class="text-xs text-gray-500 ml-4">examples/hello.dscl</span>
-            </div>
-            <pre class="p-6 overflow-x-auto"><code class="language-rust">use pkg::discord
+    <main>
+        <header class="max-w-6xl mx-auto px-8 py-20 text-center">
+            <h2 class="text-5xl md:text-7xl font-extrabold text-white mb-6">Build Discord Bots
+            <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">with DSCL</span></h2>
+            <p class="text-gray-400 text-lg max-w-2xl mx-auto mb-10">
+                A high-level language designed specifically for Discord bot development. Write clean code that transpiles directly to Python.
+            </p>
+        </header>
+
+        <section id="examples" class="max-w-4xl mx-auto px-8 pb-20">
+            <div class="bg-[#24262b] rounded-xl shadow-2xl overflow-hidden border border-gray-700">
+                <div class="flex items-center space-x-2 px-4 py-3 bg-[#1e2024] border-b border-gray-700">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span class="text-xs text-gray-500 ml-4">examples/hello.dscl</span>
+                </div>
+                <pre class="p-6 overflow-x-auto"><code class="language-rust">use pkg::discord
 use random
 
 const intents = new Intents()
@@ -48,78 +78,106 @@ const TOKEN = "MY_VERY_SECRET_TOKEN"
 intents->on_messages=True
 
 const bot = new Bot(
-	prefix,
-	intents
+        prefix,
+        intents
 )
 cmd hello(User: person) -> bot{
-	this->respond("Hi%s" % person)
+        this->respond("Hi%s" % person)
 }
 
 cmd roll_dice(num: min, num: max) -> bot{
-	mut number = random->randint(min, max)
-	this->respond("Your random number is: %s" % number)
+        mut number = random->randint(min, max)
+        this->respond("Your random number is: %s" % number)
 }
 
 bot->run(TOKEN)</code></pre>
-        </div>
-    </section>
+            </div>
+        </section>
 
-    <section id="install" class="bg-[#141517] py-20 px-8">
-        <div class="max-w-4xl mx-auto">
-            <h3 class="text-3xl font-bold mb-8 text-white">Get Started</h3>
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="space-y-4">
-                    <p class="text-gray-400">Clone the repository and install dependencies to begin compiling your DSCL scripts.</p>
-                    <div class="bg-black p-4 rounded-lg font-mono text-sm text-emerald-400 border border-emerald-900/30">
-                        git clone https://github.com/H1387Lmao/DSCL.git<br>
-                        cd DSCL<br>
-                        pip install -r requirements.txt
+        <section id="install" class="bg-[#141517] py-20 px-8">
+            <div class="max-w-4xl mx-auto">
+                <h3 class="text-3xl font-bold mb-8 text-white">Get Started</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <p class="text-gray-400">Clone the repository and install dependencies to begin compiling your DSCL scripts.</p>
+                        <div class="bg-black p-4 rounded-lg font-mono text-sm text-emerald-400 border border-emerald-900/30">
+                            git clone https://github.com/H1387Lmao/DSCL.git<br>
+                            cd DSCL<br>
+                            pip install -r requirements.txt
+                        </div>
                     </div>
-                </div>
-                <div class="space-y-4">
-                    <h4 class="text-xl font-semibold text-white">Compilation</h4>
-                    <p class="text-sm text-gray-400 italic">Current version defaults to compiler mode.</p>
-                    <div class="bg-black p-4 rounded-lg font-mono text-sm text-blue-400 border border-blue-900/30">
-                        python main.py test.dscl -o test.py
+                    <div class="space-y-4">
+                        <h4 class="text-xl font-semibold text-white">Compilation</h4>
+                        <p class="text-sm text-gray-400 italic">Current version defaults to compiler mode.</p>
+                        <div class="bg-black p-4 rounded-lg font-mono text-sm text-blue-400 border border-blue-900/30">
+                            python main.py test.dscl -o test.py
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="max-w-4xl mx-auto px-8 py-20">
-        <h3 class="text-3xl font-bold mb-8 text-white">Roadmap</h3>
-        <div class="overflow-hidden rounded-xl border border-gray-700">
-            <table class="w-full text-left bg-[#24262b]">
-                <thead class="bg-[#1e2024] text-gray-400 uppercase text-xs">
-                    <tr>
-                        <th class="px-6 py-4">Feature</th>
-                        <th class="px-6 py-4">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-700">
-                    <tr>
-                        <td class="px-6 py-4">Transpiler for Pycord</td>
-                        <td class="px-6 py-4 text-emerald-400 font-bold">✓ Ready</td>
-                    </tr>
-                    <tr>
-                        <td class="px-6 py-4">Components V2 Integration</td>
-                        <td class="px-6 py-4 text-yellow-500 font-bold">W.I.P</td>
-                    </tr>
-                    <tr>
-                        <td class="px-6 py-4">Interpreter Runtime</td>
-                        <td class="px-6 py-4 text-gray-500 font-bold">Planned</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
+        <section id="features" class="max-w-4xl mx-auto px-8 py-20">
+            <h3 class="text-3xl font-bold mb-8 text-white">Roadmap</h3>
+            <div class="overflow-hidden rounded-xl border border-gray-700">
+                <table class="w-full text-left bg-[#24262b]">
+                    <thead class="bg-[#1e2024] text-gray-400 uppercase text-xs">
+                        <tr>
+                            <th class="px-6 py-4">Feature</th>
+                            <th class="px-6 py-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        <tr>
+                            <td class="px-6 py-4">Transpiler for Pycord</td>
+                            <td class="px-6 py-4 text-emerald-400 font-bold">✓ Ready</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4">Components V2 Integration</td>
+                            <td class="px-6 py-4 text-yellow-500 font-bold">W.I.P</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4">Interpreter Runtime</td>
+                            <td class="px-6 py-4 text-gray-500 font-bold">Planned</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
 
     <footer class="text-center py-10 text-gray-600 text-sm border-t border-gray-800">
         &copy; 2026 DSCL Project. Built for the Discord Developer community. By H1387Lmao♥
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script>hljs.highlightAll();</script>
+    <script>
+        hljs.highlightAll();
+
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const menuIcon = document.getElementById('menu-icon');
+
+        function toggleMenu() {
+            const isHidden = mobileMenu.classList.toggle('hidden');
+            
+            // Toggle between hamburger icon and X icon
+            menuIcon.innerHTML = isHidden 
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>' 
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
+        }
+
+        menuToggle.addEventListener('click', toggleMenu);
+
+        // Auto-close menu when a link is clicked
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (!mobileMenu.classList.contains('hidden')) {
+                    toggleMenu();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
