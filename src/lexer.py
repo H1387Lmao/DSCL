@@ -6,14 +6,13 @@ tokens = (
 )
 
 keywords = (
-    'cmd',
-    'fn',
-    'User', 
-    'str', 
-    'num', 
+    'cmd', 'fn',
+    'User', 'str', 'num', 
     'const', 'mut',
     'new',
-    'use', 'pkg'
+    'use', 'pkg',
+    'if', 'else', 'elseif', 
+    'while', 'for'
 )
 
 for kw in keywords:
@@ -30,8 +29,14 @@ symbols = {
     "->": "ARROW",
     ",": "COMMA",
     " ()": "PAREN",
-    f" {'{}'}": "BRACE",
-    "::": "DOUBLECOLON"
+    f" {'{}'}": "BRACE", #hacky fix for lite-xl's incorrect syntax highlighter
+    "::": "DOUBLECOLON",
+    "==": "EQS",
+    "!=": "NEQS",
+    ">=": "MEQS",
+    "<=": "LEQS",
+    "<" : "LT",
+    ">" : "MT",
 }
 
 for k,v in symbols.items():

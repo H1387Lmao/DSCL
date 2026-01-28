@@ -21,20 +21,20 @@ including a result built by codegen.py
 
 ## Different modes
 
-To use the compiler mode, run with a `-o` option
+To use a custom file target, run with a `-o` option
 
 ```sh
-python main.py examples/hello.dscl -o bin/hello.py
+python main.py examples/hello.dscl -o examples/hello.py
 ```
 
-> Interpreter mode is not yet implemented
-> it will default to the compiler option!
-> please keep mind of this
+> Pycord is the default dependency for now for easy use.
+> Right until custom Discord Library is complete
 
-To use the interpreter mode, run without any other options
+After more library options are added
+You can select them in the future by using the `-compiler=` flag
 
 ```sh
-python main.py examples/hello.dscl
+python main.py examples/hello.dscl -compiler=Pycord
 ```
 
 ## W.I.P Features
@@ -43,5 +43,5 @@ python main.py examples/hello.dscl
 |:-------------------------:|:----------:|
 |Transpiler for Pycord      |Yes         |
 |Components V2 Integration  |No          |
-|Interpreter Runtime        |No          |
+|Custom Pycord Wrapper      |No          |
 |Better syntax (hopefully)  |Probably?   |

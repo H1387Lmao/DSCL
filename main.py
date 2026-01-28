@@ -34,9 +34,13 @@ else:
 
 if ast:
     res = BaseGenerator(ast).compile()
+    if args.db:
+        print(res)
+
 if target:
     o = open(target, "w")
 o.write(res)
 o.close()
+
 
 print(f"[{Green}COMPILED{Reset}] Successfully wrote {len(res.split("\n"))} lines to {target}")

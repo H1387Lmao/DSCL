@@ -261,6 +261,89 @@ def p_use_pkg(p):
         target=p[4]
     )
 
+def p_if_stmt(p):
+    """
+    stmt : if LPAREN cond RPAREN scope elseifs else_stmt
+    """
+    p[0]=Ast(
+        "if",
+        cond=p[3],
+        stmts=p[5],
+        elseifs=p[6],
+        else_stmt=p[7]
+    )
+
+def p_elseifs_single(p):
+    """
+    elseifs : elseif LPAREN cond RPAREN scope
+    """
+    p[0]=[Ast(
+        "elseif",
+        cond=p[3]
+    )]
+def p_elseifs_multiple(p):
+    """
+    elseifs : elseifs elseif LPAREN cond RPAREN scope
+    """
+    p[1]+=Ast(
+        "elseif",
+        cond=p[3]
+    )
+    p[0]=p[1]
+
+def p_elseifs_none(p):
+    """
+    elseifs :
+    """
+    p[0]=[]
+
+def p_else_none(p):
+    """
+    else_stmt :
+    """
+
+def p_else(p):
+    """
+    else_stmt : else scope
+    """
+    p[0]=Ast(
+        "else",
+        stmts=p[2]
+    )
+
+def p_cond_single(p):
+    """
+    cond : expr
+    """
+    p[0]=Ast(
+        "cond",
+        left=p[1],
+        op=None,
+        right=None
+    )
+
+def p_cond_compare(p):
+    """
+    cond : expr cmp expr
+    """
+    p[0]=Ast(
+        "cond",
+        left=p[1],
+        op=p[2],
+        right=p[3]
+    )
+
+def p_cmp(p):
+    """
+    cmp : EQS
+        | NEQS
+        | MEQS
+        | LEQS
+        | LT
+        | MT
+    """
+    p[0]=p[1]
+
 def p_error(p):
     if p:
         raise SyntaxError(f"Syntax error at {p.value} {p.lexer.lineno}")
