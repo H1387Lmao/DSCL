@@ -8,7 +8,7 @@ tokens = (
 keywords = (
     'cmd', 'fn', 
     'async', 'await',
-    'User', 'str', 'num', 
+    'User', 'String', 'Number', 'Context',
     'const', 'mut',
     'new',
     'use', 'pkg',

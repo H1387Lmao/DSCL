@@ -21,7 +21,7 @@ cmd hello(User: person) -> bot{
 	}
 }
 
-cmd roll_dice(num: min, num: max) -> bot{
+cmd roll_dice(Number: min, Number: max) -> bot{
 	mut number = random->randint(min, max)
 	this->respond("Your random number is: %s" % number)
 }

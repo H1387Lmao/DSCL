@@ -130,7 +130,7 @@ class BaseGenerator:
             case "num":
                 return ": int"
             case _:
-                return type
+                return ": "+type
 
     def compile_params(self, args, is_command=False):
         res = "" if not is_command else "this, "
@@ -163,6 +163,7 @@ class BaseGenerator:
             _async = "async "
 
         self._add_line(f"{_async}def {stmt.name}({self.compile_params(stmt.args, is_cmd)}):")
+        print(stmt)
         self.scopes[-1][stmt.name]=("func", stmt.is_async)
         self.scopes.append({})
 
@@ -189,6 +190,7 @@ class BaseGenerator:
             case "var_resign":
                 name = self.compile_expr(stmt.name)
                 value = self.compile_expr(stmt.value)
+                op=stmt.operator if hasattr(stmt, "operator") else "="
                 if '.' not in name:
                     v = self.search_var(name)
                     if v is None:
@@ -197,11 +199,13 @@ class BaseGenerator:
                     elif v[0] == "const":
                         print(f"{Red}[COMPILER]{Reset} Can't reassign variable that is a constant!")
                         return
-                self._add_line(f"{name} = {value}")
+                self._add_line(f"{name} {op} {value}")
             case "usepkg":
                 match stmt.target:
                     case "discord":
                         self._add_line("from dscl.discord import *")
+                    case "discordui":
+                        self._add_line("from dscl.discord.ui import *")
                     case _:
                         print(f"{Red}[COMPILER]{Reset}Unknown package: '{stmt.target}'")
                         return

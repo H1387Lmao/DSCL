@@ -73,7 +73,7 @@ def p_cmd_def(p):
     """
     stmt : cmd ID LPAREN params RPAREN ARROW ID scope
     """
-    p[0] = Ast('cmd_decl', name=p[2], args=p[4], stmts=p[8], target=p[7])
+    p[0] = Ast('cmd_decl', is_async=True, name=p[2], args=p[4], stmts=p[8], target=p[7])
 
 def p_func_decl(p):
     """
@@ -168,9 +168,10 @@ def p_param_list_multi(p):
 
 def p_param(p):
     """
-    param : str COLON ID
-          | num COLON ID
+    param : String COLON ID
+          | Number COLON ID
           | User COLON ID
+          | Context COLON ID
     """
     p[0] = Ast('param', type=p[1], name=p[3])
 
@@ -212,9 +213,26 @@ def p_expr_binop(p):
          | expr MULTIPLY expr
          | expr DIVIDE expr
          | expr MODULO expr
+
     """
     p[0] = Ast('binop', left=p[1], op=p[2], right=p[3])
+def p_expr_operation(p):
+    """
+    op : PLUS
+       | MINUS
+       | MULTIPLY
+       | DIVIDE
+       | MODULO
+    """
+    p[0]=p[1]
 
+def p_operation_reassign(p):
+    """
+    reop : op EQUALS
+         | EQUALS
+    """
+    p[0]="".join(p[1:])
+    
 def p_expr_value(p):
     """
     expr : ID
@@ -252,11 +270,12 @@ def p_assign(p):
 
 def p_reassign(p):
     """
-    stmt : ID EQUALS expr
+    stmt : ID reop expr
     """
     p[0]=Ast(
         'var_resign', 
         name=p[1],
+        operator=p[2],
         value=p[3]
     )
 
@@ -266,7 +285,7 @@ def p_getattr(p):
             | ID ARROW ID
     """
     if isinstance(p[1], Ast):
-        p[1]=[p[0].root, p[0].target]
+        p[1]=[p[1].root, p[1].target]
     p[0]=Ast(
         "getattr",
         root=p[1],

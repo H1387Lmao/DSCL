@@ -1,0 +1,66 @@
+use pkg::discord
+use pkg::discordui
+
+use random
+
+fishes = [
+	"cod", "salmon", "pufferfish"
+]
+
+caught = new UserDatabase()
+
+const fish_bot = new Bot(
+	prefix="!",
+	intents=new Intents(
+		message_content=True
+	)
+)
+
+cmd inv()->fish_bot{
+	const user = tostr(this->user->id)
+	const inv = caught[user]
+	mut text = ""
+	for fish: inv{
+		text+=fish+"\n"
+	}
+	this->respond(
+		view=View(
+			Container(
+				Text("Your inventory:"),
+				Text(text),
+				color=Colors->Red
+			)
+		)
+	)
+}
+
+cmd fish(Number: amount_to_fish)->fish_bot{
+	mut fishes_caught = []
+	for fish: 0->amount_to_fish{
+		fishes_caught->append(
+			random->choice(
+				fishes
+			)
+		)
+	}
+	const fishes_text = "\n"->join(fishes_caught)
+	const Again = new Button("Fish again")
+	Again->callback=fn(Context: this){
+		await fish(this)
+	}
+	this->respond(
+		view=View(
+			Container(
+				Text("You caught these:"),
+				Text(fishes),
+				Row(
+					Again
+				),
+				color=Colors->Green
+			)
+		)
+	)
+}
+
+//fake token for purposes
+fish_bot->run("Mtwdksnndncjjfnee.cdjejsjff.ehhes")
