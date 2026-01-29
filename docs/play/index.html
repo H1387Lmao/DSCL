@@ -76,139 +76,164 @@
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
-    <script>
-        let pyodide;
-        let inputEditor, outputEditor;
-        // Using raw content URL from master branch
-        const REPO_RAW = "https://raw.githubusercontent.com/H1387Lmao/DSCL/master/";
-        
-        // Ensure pathing matches your GitHub structure
-        const DEPENDENCIES = ['main.py', 'src/lexer.py', 'src/parser.py', 'src/codegen.py']; 
+<script>
+    let pyodide;
+    let inputEditor, outputEditor;
+    const REPO_RAW = "https://raw.githubusercontent.com/H1387Lmao/DSCL/master/";
+    const DEPENDENCIES = ['main.py', 'src/lexer.py', 'src/parser.py', 'src/codegen.py'];
 
-        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
-        require(['vs/editor/editor.main'], function () {
-            inputEditor = monaco.editor.create(document.getElementById('input-editor'), {
-                value: 'use pkg::discord\n\nconst bot = new Bot("!", new Intents(message_content=True))\n\ncmd ping() -> bot {\n    this->respond("Pong!")\n}\n\nbot->run("TOKEN")',
-                language: 'rust',
-                theme: 'vs-dark',
-                automaticLayout: true,
-                fontSize: 14,
-                padding: { top: 20 }
-            });
-
-            outputEditor = monaco.editor.create(document.getElementById('output-editor'), {
-                value: '',
-                language: 'python',
-                theme: 'vs-dark',
-                readOnly: true,
-                automaticLayout: true,
-                fontSize: 14,
-                padding: { top: 20 }
-            });
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+    require(['vs/editor/editor.main'], function () {
+        inputEditor = monaco.editor.create(document.getElementById('input-editor'), {
+            value: 'use pkg::discord\n\nconst bot = new Bot("!", new Intents(message_content=True))\n\ncmd ping() -> bot {\n    this->respond("Pong!")\n}\n\nbot->run("TOKEN")',
+            language: 'rust',
+            theme: 'vs-dark',
+            automaticLayout: true,
+            fontSize: 14,
+            padding: { top: 20 }
         });
 
-        async function init() {
-            try {
-                pyodide = await loadPyodide();
-                await pyodide.loadPackage("micropip");
-                const micropip = pyodide.pyimport("micropip");
-                
-                updateStatus("Installing PLY...", "yellow");
-                await micropip.install("ply");
+        outputEditor = monaco.editor.create(document.getElementById('output-editor'), {
+            value: '',
+            language: 'python',
+            theme: 'vs-dark',
+            readOnly: true,
+            automaticLayout: true,
+            fontSize: 14,
+            padding: { top: 20 }
+        });
+    });
 
-                updateStatus("Fetching Repository Files...", "yellow");
-                for (const file of DEPENDENCIES) {
-                    const resp = await fetch(REPO_RAW + file);
-                    if (!resp.ok) throw new Error(`Failed to fetch ${file}`);
-                    const text = await resp.text();
+    async function init() {
+        try {
+            pyodide = await loadPyodide();
+            await pyodide.loadPackage("micropip");
+            const micropip = pyodide.pyimport("micropip");
+            
+            updateStatus("Installing PLY...", "yellow");
+            await micropip.install("ply");
 
-                    // DIRECTORY CREATION LOGIC
-                    if (file.includes('/')) {
-                        const parts = file.split('/');
-                        let currentPath = '';
-                        for (let i = 0; i < parts.length - 1; i++) {
-                            currentPath += (currentPath ? '/' : '') + parts[i];
-                            try {
-                                pyodide.FS.mkdir(currentPath);
-                            } catch (e) {} // Path exists
-                        }
+            updateStatus("Fetching Repository Files...", "yellow");
+            for (const file of DEPENDENCIES) {
+                const resp = await fetch(REPO_RAW + file);
+                if (!resp.ok) throw new Error(`Failed to fetch ${file}`);
+                const text = await resp.text();
+
+                if (file.includes('/')) {
+                    const parts = file.split('/');
+                    let currentPath = '';
+                    for (let i = 0; i < parts.length - 1; i++) {
+                        currentPath += (currentPath ? '/' : '') + parts[i];
+                        try { pyodide.FS.mkdir(currentPath); } catch (e) {}
                     }
-
-                    pyodide.FS.writeFile(file, text);
                 }
-
-                updateStatus("Ready to Compile", "emerald");
-                document.getElementById('spinner').style.display = 'none';
-                document.getElementById('run-btn').disabled = false;
-                logToConsole("System initialized. You can now compile DSCL code.");
-            } catch (err) {
-                updateStatus("Load Error", "red");
-                logToConsole("Error during initialization: " + err.message);
+                pyodide.FS.writeFile(file, text);
             }
+
+            updateStatus("Ready to Compile", "emerald");
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('run-btn').disabled = false;
+            logToConsole("System initialized.");
+        } catch (err) {
+            updateStatus("Load Error", "red");
+            logToConsole("Error during initialization: " + err.message);
         }
+    }
 
-        function updateStatus(text, color) {
-            document.getElementById('status-text').innerText = text;
-            const dot = document.getElementById('status-dot');
-            dot.className = `w-3 h-3 rounded-full bg-${color}-500 animate-pulse`;
-        }
+    function updateStatus(text, color) {
+        document.getElementById('status-text').innerText = text;
+        const dot = document.getElementById('status-dot');
+        dot.className = `w-3 h-3 rounded-full bg-${color}-500 animate-pulse`;
+    }
 
-        function logToConsole(msg) {
-            const consoleBox = document.getElementById('console-output');
-            consoleBox.innerText += `\n> ${msg}`;
-            consoleBox.scrollTop = consoleBox.scrollHeight;
-        }
+    function logToConsole(msg) {
+        const consoleBox = document.getElementById('console-output');
+        consoleBox.innerText += `\n> ${msg}`;
+        consoleBox.scrollTop = consoleBox.scrollHeight;
+    }
 
-        document.getElementById('run-btn').onclick = async () => {
-            const code = inputEditor.getValue();
-            pyodide.FS.writeFile('input.dscl', code);
-            logToConsole("Transpiling...");
+    document.getElementById('run-btn').onclick = async () => {
+        const code = inputEditor.getValue();
+        // Clear previous output file to avoid reading old results
+        try { pyodide.FS.unlink('output.py'); } catch(e) {}
+        
+        pyodide.FS.writeFile('input.dscl', code);
+        logToConsole("Transpiling...");
 
-            try {
-                // Ensure sys.path includes the 'src' folder so imports work in Pyodide
-				const pyResult = await pyodide.runPythonAsync(`
+        try {
+            const pyResult = await pyodide.runPythonAsync(`
 import sys
-import io
 import os
+import io
+import importlib
 
+# 1. Setup Environment
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
+if os.path.join(os.getcwd(), "src") not in sys.path:
+    sys.path.append(os.path.join(os.getcwd(), "src"))
 
 output_capture = io.StringIO()
 sys.stdout = output_capture
 sys.stderr = output_capture
 
+compiled_text = ""
+logs = ""
+
 try:
     import main
-    import importlib
-    importlib.reload(main)    
-    try:
-        main.compile("input.dscl", "output.py")
-    except SystemExit:
-        pass 
+    importlib.reload(main)
 
-    # Read the resulting file that your compiler wrote
-    with open("output.py", "r") as f:
-        compiled_code = f.read()
+    # Prepare Arguments
+    sys.argv = ["main.py", "compile", "input.dscl", "-o", "output.py"]
+    
+    # Execute Compiler
+    try:
+        main.main()
+    except SystemExit:
+        pass # Argparse often calls sys.exit()
+
+    # Retrieve Result
+    if os.path.exists("output.py"):
+        with open("output.py", "r") as f:
+            compiled_text = f.read()
+    else:
+        compiled_text = "# Error: Output file was not generated."
     
     logs = output_capture.getvalue()
-    [compiled_code, logs]
 except Exception as e:
-    ["# Error: " + str(e), str(e)]
-				`);
+    compiled_text = f"# Compiler Crash:\\n{str(e)}"
+    logs = str(e)
 
-                outputEditor.setValue(pyResult.get(0));
-                logToConsole(pyResult.get(1) || "Done.");
-            } catch (err) {
-                logToConsole("Runtime Error: " + err.message);
+# Ensure this is the last expression so JS receives it
+[compiled_text, logs]
+            `);
+
+            // 2. Safely extract results from the PyProxy
+            if (pyResult && typeof pyResult.get === 'function') {
+                const outCode = pyResult.get(0);
+                const outLogs = pyResult.get(1);
+                
+                outputEditor.setValue(outCode);
+                logToConsole(outLogs || "Transpilation complete.");
+                
+                // Clean up the proxy to prevent memory leaks
+                pyResult.destroy();
+            } else {
+                logToConsole("Runtime Error: Python returned unexpected data type.");
             }
-        };
 
-        document.getElementById('menu-toggle').onclick = () => {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
-        };
+        } catch (err) {
+            logToConsole("JS Bridge Error: " + err.message);
+            console.error(err);
+        }
+    };
 
-        init();
-    </script>
+    document.getElementById('menu-toggle').onclick = () => {
+        document.getElementById('mobile-menu').classList.toggle('hidden');
+    };
+
+    init();
+</script>
 </body>
 </html>
