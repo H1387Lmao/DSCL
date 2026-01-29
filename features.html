@@ -7,55 +7,65 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
     <style>
-        .feature-card { transition: transform 0.2s ease; }
-        .feature-card:hover { transform: translateY(-4px); }
+        html { scroll-behavior: smooth; }
+        .feature-card { transition: all 0.3s ease; }
+        .feature-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
     </style>
 </head>
-<body class="bg-[#1a1c1e] text-gray-200 font-sans">
+<body class="bg-[#1a1c1e] text-gray-200 font-sans leading-relaxed">
 
-    <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">
+    <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">                                        
         <nav class="flex justify-between items-center px-8 py-6 max-w-6xl mx-auto">
             <h1 class="text-2xl font-bold tracking-tighter text-white">
-                DSCL<span class="text-blue-500">_</span><span class="text-transparent text-sm font-bold bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500">Features</span>
+                DSCL<span class="text-blue-500">_</span><span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">FEATURES</span>
             </h1>
-            <a href="index.html" class="text-sm font-medium hover:text-blue-400 transition">« Back to Home</a>
+            <div class="flex space-x-6 text-sm font-medium items-center">
+                <a href="index.html" class="hover:text-blue-400 transition">Home</a>
+                <a href="https://github.com/H1387Lmao/DSCL" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition text-xs">GitHub</a>
+            </div>
         </nav>
     </header>
 
     <main class="max-w-6xl mx-auto px-8 py-16">
-        <header class="mb-16">
-            <h2 class="text-4xl font-extrabold text-white mb-4"><span>Language </span><span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Features</span></h2>
-            <p class="text-gray-400">Explore the syntax and capabilities of the DSCL language.</p>
-        </header>
+        <div class="mb-16">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-4 italic">Documentation_</h2>
+            <p class="text-gray-400 text-lg max-w-2xl">
+                Explore the syntax of DSCL. Everything inside backticks in the descriptions is automatically styled with the signature brand gradient.
+            </p>
+        </div>
 
-        <div id="features-container" class="grid gap-12">
-            </div>
+        <div id="features-container" class="space-y-12"></div>
     </main>
 
     <footer class="text-center py-10 text-gray-600 text-sm border-t border-gray-800 mt-20">
-        &copy; 2026 DSCL Project. Built for the Discord Developer community.
+        &copy; 2026 DSCL Project. By H1387Lmao♥
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-
     <script>
         const features = [
             {
-                title: "Command Declaration",
-                description: "Define commands easily with typed parameters. The '-> bot' syntax attaches the command to your bot instance automatically.",
-                code: `cmd hello(User: person) -> bot {\n    this->respond("Hi %s" % person)\n}`,
-                language: "rust" // Using rust for highlighting as it looks similar
-            },
-            {
-                title: "Mutable Variables",
-                description: "DSCL uses 'mut' for variables that change and 'const' for constants, providing variable safety",
-                code: `mut count = 0\nconst MAX_RETRIES = 5\n\ncount = count + 1`,
+                title: "Command System",
+                description: "Creating commands is simple with the `cmd` keyword.",
+                code: `cmd greet(User: member) -> bot {\n    this->respond("Welcome to the server, %s!" % member)\n}`,
                 language: "rust"
             },
             {
-                title: "Package Management",
-                description: "Import functionality from the DSCL core or standard Python libraries using the 'use' keyword.",
-                code: `use pkg::discord\nuse random\nuse time`,
+                title: "Command Paramater Types",
+                description: "These are the different possible types for parameters: `User`, `num`, `str`",
+                code: `cmd gift_exp(User: member, num: xp, str: message)`,
+                language: "rust"
+            },
+            {
+                title: "Variable Safety",
+                description: "Manage state using `mut` for variables that change over time and `const` for static configuration like `prefix` or `TOKEN`.",
+                code: `mut xp = 0\nconst LVL_CAP = 100\n\nxp = xp + 5`,
+                language: "rust"
+            },
+            {
+                title: "Native Imports",
+                description: "Use the `use` keyword to pull in `pkg::discord` or standard Python modules like `random` for bot logic.",
+                code: `use pkg::discord\nuse random\n\nmut chance = random->randint(1, 10)`,
                 language: "rust"
             }
         ];
@@ -63,30 +73,35 @@
         const container = document.getElementById('features-container');
 
         features.forEach(feature => {
-            const section = document.createElement('section');
-            section.className = 'feature-card grid md:grid-cols-2 gap-8 items-start bg-[#24262b] p-8 rounded-2xl border border-gray-700 shadow-xl';
+            const regex = /`([^`]+)`/g;
+            const styledDescription = feature.description.replace(
+                regex, 
+                '<span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 font-mono font-bold">$1</span>'
+            );
+
+            const card = document.createElement('section');
+            card.className = "feature-card grid md:grid-cols-2 gap-8 items-center bg-[#24262b] p-8 rounded-2xl border border-gray-700 shadow-2xl";
             
-            section.innerHTML = `
+            card.innerHTML = `
                 <div class="space-y-4">
-                    <h3 class="text-2xl font-bold text-white">${feature.title}</h3>
-                    <p class="text-gray-400 leading-relaxed">
-                        ${feature.description}
+                    <h3 class="text-2xl font-bold text-white tracking-tight">${feature.title}</h3>
+                    <p class="text-gray-400 text-md leading-relaxed">
+                        ${styledDescription}
                     </p>
                 </div>
-                <div class="rounded-lg overflow-hidden border border-gray-800 shadow-2xl">
-                    <div class="bg-[#1e2024] px-4 py-2 border-b border-gray-800 flex items-center justify-between">
-                        <span class="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Code Example</span>
-                        <div class="flex space-x-1">
-                            <div class="w-2 h-2 rounded-full bg-gray-700"></div>
-                            <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                <div class="rounded-xl overflow-hidden border border-gray-800 bg-[#1e2024]">
+                    <div class="flex items-center px-4 py-2 border-b border-gray-800 bg-[#1a1c1e]/50">
+                        <div class="flex space-x-1.5">
+                            <div class="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/40"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/40"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/40"></div>
                         </div>
                     </div>
-                    <pre class="m-0"><code class="language-${feature.language} p-6 block">${feature.code}</code></pre>
+                    <pre class="text-sm"><code class="language-${feature.language}">${feature.code}</code></pre>
                 </div>
             `;
-            container.appendChild(section);
+            container.appendChild(card);
         });
-
         hljs.highlightAll();
     </script>
 </body>
