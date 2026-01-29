@@ -11,9 +11,17 @@ Purple=Ansi+"94m"
 Reset=Ansi+"0m"
 Gray=Ansi+"90m"
 
-def AstView(node, prefix="", is_last=True, ITEM_NAME=None):
+def AstView(node, prefix="", is_last=True, ITEM_NAME=None, no_color=False):
     if not isinstance(node, Ast):
         return ""
+    if no_color:
+        Yellow=""
+        Green=""
+        Red=""
+        Blue=""
+        Purple=""
+        Reset=""
+        Gray=""
 
     res = prefix
     name = ITEM_NAME+": " if ITEM_NAME is not None else ""
