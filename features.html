@@ -10,6 +10,11 @@
         html { scroll-behavior: smooth; }
         .feature-card { transition: all 0.3s ease; }
         .feature-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
+        
+        /* Smooth transition for code swapping */
+        .code-container { position: relative; overflow: hidden; }
+        .code-view { transition: opacity 0.2s ease, transform 0.2s ease; }
+        .hidden-view { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; transform: translateY(10px); }
     </style>
 </head>
 <body class="bg-[#1a1c1e] text-gray-200 font-sans leading-relaxed">
@@ -19,65 +24,55 @@
             <h1 class="text-2xl font-bold tracking-tighter text-white">
                 DSCL<span class="text-blue-500">_</span><span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">FEATURES</span>
             </h1>
-            <div class="flex space-x-6 text-sm font-medium items-center">
-                <a href="index.html" class="hover:text-blue-400 transition">Home</a>
-                <a href="https://github.com/H1387Lmao/DSCL" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition text-xs">GitHub</a>
-            </div>
+            <a href="index.html" class="hover:text-blue-400 transition text-sm">Home</a>
         </nav>
     </header>
 
     <main class="max-w-6xl mx-auto px-8 py-16">
-        <div class="mb-16">
-            <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-4 italic">Documentation_</h2>
+        <div class="mb-16 text-center md:text-left">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-4 italic">Language <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Features</span></h2>
             <p class="text-gray-400 text-lg max-w-2xl">
-                Explore the syntax of DSCL. Everything inside backticks in the descriptions is automatically styled with the signature brand gradient.
+                Here's some of the features DSCL has to offer.
             </p>
         </div>
 
-        <div id="features-container" class="space-y-12"></div>
+        <div id="features-container" class="space-y-15"></div>
     </main>
-
-    <footer class="text-center py-10 text-gray-600 text-sm border-t border-gray-800 mt-20">
-        &copy; 2026 DSCL Project. By H1387Lmao♥
-    </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script>
         const features = [
             {
                 title: "Command System",
-                description: "Creating commands is simple with the `cmd` keyword.",
-                code: `cmd greet(User: member) -> bot {\n    this->respond("Welcome to the server, %s!" % member)\n}`,
-                language: "rust"
+                description: "Creating commands is simple with the `cmd` keyword. DSCL handles the `async def` and `ctx` boilerplate for you.",
+                dscl: `cmd greet(User: member) -> bot {\n    this->respond("Hi %s" % member)\n}`,
+                python: `@bot.slash_command()\nasync def greet(ctx, member: discord.Member):\n    await ctx.respond(f"Hi {member}")`
             },
             {
-                title: "Command Paramater Types",
-                description: "These are the different possible types for parameters: `User`, `num`, `str`",
-                code: `cmd gift_exp(User: member, num: xp, str: message)`,
-                language: "rust"
+                title: "Variables & Assignment",
+                description: "DSCL uses `mut` and `const`. Transpilation ensures Python's naming conventions and scope logic are followed.",
+                dscl: `mut count = 0\nconst TOKEN = "XYZ"\n\ncount = count + 1`,
+                python: `count = 0\nTOKEN = "XYZ"\n\ncount = count + 1`
             },
             {
-                title: "Variable Safety",
-                description: "Manage state using `mut` for variables that change over time and `const` for static configuration like `prefix` or `TOKEN`.",
-                code: `mut xp = 0\nconst LVL_CAP = 100\n\nxp = xp + 5`,
-                language: "rust"
+                title: "For Loops",
+                description: "Creating for loops is easy, using arrays or ranges",
+                dscl: `for i: 1->10{\n  print(i)\n}\nfor 1->5{}\nfor i: my_array{}`,
+                python: `for i in range(1,10):\n  print(i)\nfor _ in range(1,5):\n  pass\nfor i in my_array:\n  pass`
             },
             {
-                title: "Native Imports",
-                description: "Use the `use` keyword to pull in `pkg::discord` or standard Python modules like `random` for bot logic.",
-                code: `use pkg::discord\nuse random\n\nmut chance = random->randint(1, 10)`,
-                language: "rust"
-            }
+                title: "Packages & Imports",
+                description: "DSCL allows simple packages and native imports with the `use` keyword.",
+                dscl: `use pkg::discord\nuse random\nuse time\n\ntime->sleep(.67)\nprint(random->randint(1,500))`,
+                python: `from discord.ext import commands\nfrom discord import Intents\nimport random\nimport time\n\ntime.sleep(0.67)\nprint(random.randint(1,500))`
+            },
         ];
 
         const container = document.getElementById('features-container');
 
-        features.forEach(feature => {
+        features.forEach((feature, index) => {
             const regex = /`([^`]+)`/g;
-            const styledDescription = feature.description.replace(
-                regex, 
-                '<span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 font-mono font-bold">$1</span>'
-            );
+            const styledDescription = feature.description.replace(regex, '<span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 font-mono font-bold">$1</span>');
 
             const card = document.createElement('section');
             card.className = "feature-card grid md:grid-cols-2 gap-8 items-center bg-[#24262b] p-8 rounded-2xl border border-gray-700 shadow-2xl";
@@ -85,23 +80,51 @@
             card.innerHTML = `
                 <div class="space-y-4">
                     <h3 class="text-2xl font-bold text-white tracking-tight">${feature.title}</h3>
-                    <p class="text-gray-400 text-md leading-relaxed">
-                        ${styledDescription}
-                    </p>
+                    <p class="text-gray-400 leading-relaxed">${styledDescription}</p>
                 </div>
+                
                 <div class="rounded-xl overflow-hidden border border-gray-800 bg-[#1e2024]">
-                    <div class="flex items-center px-4 py-2 border-b border-gray-800 bg-[#1a1c1e]/50">
-                        <div class="flex space-x-1.5">
-                            <div class="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/40"></div>
-                            <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/40"></div>
-                            <div class="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/40"></div>
+                    <div class="flex items-center justify-between px-4 py-2 border-b border-gray-800 bg-[#1a1c1e]/50">
+                        <div class="flex space-x-1">
+                            <div class="w-2 h-2 rounded-full bg-red-500/30"></div>
+                            <div class="w-2 h-2 rounded-full bg-yellow-500/30"></div>
+                        </div>
+                        
+                        <div class="flex bg-black/40 p-1 rounded-md">
+                            <button onclick="toggleCode(${index}, 'dscl')" id="btn-dscl-${index}" class="px-3 py-1 text-[10px] font-bold rounded transition bg-blue-600 text-white">DSCL</button>
+                            <button onclick="toggleCode(${index}, 'py')" id="btn-py-${index}" class="px-3 py-1 text-[10px] font-bold rounded transition text-gray-500 hover:text-white">PYTHON</button>
                         </div>
                     </div>
-                    <pre class="text-sm"><code class="language-${feature.language}">${feature.code}</code></pre>
+
+                    <div class="code-container relative min-h-[120px]">
+                        <pre id="dscl-${index}" class="code-view m-0"><code class="language-rust p-6 block">${feature.dscl}</code></pre>
+                        <pre id="py-${index}" class="code-view hidden-view m-0"><code class="language-python p-6 block">${feature.python}</code></pre>
+                    </div>
                 </div>
             `;
             container.appendChild(card);
         });
+
+        // Toggle Function
+        window.toggleCode = (index, type) => {
+            const dsclEl = document.getElementById(`dscl-${index}`);
+            const pyEl = document.getElementById(`py-${index}`);
+            const dsclBtn = document.getElementById(`btn-dscl-${index}`);
+            const pyBtn = document.getElementById(`btn-py-${index}`);
+
+            if (type === 'dscl') {
+                dsclEl.classList.remove('hidden-view');
+                pyEl.classList.add('hidden-view');
+                dsclBtn.className = "px-3 py-1 text-[10px] font-bold rounded transition bg-blue-600 text-white";
+                pyBtn.className = "px-3 py-1 text-[10px] font-bold rounded transition text-gray-400 hover:text-white";
+            } else {
+                pyEl.classList.remove('hidden-view');
+                dsclEl.classList.add('hidden-view');
+                pyBtn.className = "px-3 py-1 text-[10px] font-bold rounded transition bg-emerald-500 text-black";
+                dsclBtn.className = "px-3 py-1 text-[10px] font-bold rounded transition text-gray-400 hover:text-white";
+            }
+        };
+
         hljs.highlightAll();
     </script>
 </body>
