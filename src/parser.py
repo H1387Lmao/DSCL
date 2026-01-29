@@ -199,6 +199,12 @@ def p_expr_string(p):
     """
     p[0] = Ast("string", value=p[1])
 
+def p_expr_group(p):
+    """
+    expr : LPAREN expr RPAREN
+    """
+    p[0] = Ast("group", target=p[2])
+
 def p_assign(p):
     """
     stmt : mut ID EQUALS expr
@@ -263,31 +269,33 @@ def p_use_pkg(p):
 
 def p_if_stmt(p):
     """
-    stmt : if LPAREN cond RPAREN scope elseifs else_stmt
+    stmt : if cond scope elseifs else_stmt
     """
     p[0]=Ast(
         "if",
-        cond=p[3],
-        stmts=p[5],
-        elseifs=p[6],
-        else_stmt=p[7]
+        cond=p[2],
+        stmts=p[3],
+        elseifs=p[4],
+        else_stmt=p[5]
     )
 
 def p_elseifs_single(p):
     """
-    elseifs : elseif LPAREN cond RPAREN scope
+    elseifs : elseif cond scope
     """
     p[0]=[Ast(
         "elseif",
-        cond=p[3]
+        cond=p[2],
+        stmts=p[3]
     )]
 def p_elseifs_multiple(p):
     """
-    elseifs : elseifs elseif LPAREN cond RPAREN scope
+    elseifs : elseifs elseif cond scope
     """
     p[1]+=Ast(
         "elseif",
-        cond=p[3]
+        cond=p[3],
+        stmts=p[4]
     )
     p[0]=p[1]
 
@@ -344,9 +352,42 @@ def p_cmp(p):
     """
     p[0]=p[1]
 
+def p_while(p):
+    """
+    stmt : while cond scope
+    """
+    p[0]=Ast(
+        "while",
+        cond=p[2],
+        stmts=p[3]
+    )
+def p_range_expr(p):
+    """
+    expr : expr ARROW expr
+    """
+    p[0]=Ast(
+        "range",
+        min=p[1],
+        max=p[3]
+    )
+def p_for(p):
+    """
+    stmt : for ID COLON expr scope
+         | for expr scope
+    """
+    target = p[2] if len(p)==6 else None
+    cond = p[4] if target else p[2]
+    stmts=p[5] if target else p[3]
+    p[0]=Ast(
+        "for",
+        target=target,
+        cond=cond,
+        stmts=stmts
+    )
+
 def p_error(p):
     if p:
-        raise SyntaxError(f"Syntax error at {p.value} {p.lexer.lineno}")
+        raise SyntaxError(f"Syntax error '{p.value}' at Line: {p.lexer.lineno}")
     else:
         raise SyntaxError("Syntax error at EOF")
 

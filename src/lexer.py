@@ -2,7 +2,7 @@ import ply.lex as lex
 import re
 
 tokens = (
-    'ID', 'STR', 'NUM', 'FLT',
+    'ID', 'STR', 'NUM', 'FLT'
 )
 
 keywords = (
@@ -74,6 +74,10 @@ def t_ID(t):
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
+
+def t_comment(t):
+    r'\/\/.*'
+
 
 def t_error(t): pass
 

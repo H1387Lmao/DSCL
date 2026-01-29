@@ -11,7 +11,6 @@ bot = Bot(
 )
 @bot.slash_command
 async def hello(this, person: discord.Member):
-  this.respond("Hi%s" % person)
 @bot.slash_command
 async def roll_dice(this, min: int, max: int):
   number = random.randint(min, max)

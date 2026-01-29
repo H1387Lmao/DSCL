@@ -18,6 +18,7 @@ if args.i is None:
     )
 else:
     o = open(args.i)
+
     ast=parser.parse(
         o.read()
     )
@@ -41,6 +42,5 @@ if target:
     o = open(target, "w")
 o.write(res)
 o.close()
-
 
 print(f"[{Green}COMPILED{Reset}] Successfully wrote {len(res.split("\n"))} lines to {target}")
