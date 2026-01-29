@@ -29,6 +29,7 @@ def compile_dscl(args):
         with open(target, "w", encoding="utf-8") as f:
             f.write(res)
         print(f"[{Green}COMPILED{Reset}] Successfully wrote {len(res.splitlines())} lines to {target}")
+    return res
 def process_code(source):
     ast = parser.parse(source)
     return (ast, BaseGenerator(ast).compile())
@@ -56,8 +57,8 @@ def main():
     r.add_argument("file")
     args = parser.parse_args()
     if args.cmd == "compile":
-        compile_dscl(args)
+        return compile_dscl(args)
     elif args.cmd == "run":
-        run_python(args.file)
-
-main()
+        return run_python(args.file)
+if __name__=="__main__":
+    main()

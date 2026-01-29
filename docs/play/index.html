@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playground | DSCL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.min.css">
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <style>
+        html { scroll-behavior: smooth; }
+        #mobile-menu:not(.hidden) { animation: slideDown 0.2s ease-out; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .editor-container { height: 450px; border: 1px solid #334155; border-radius: 0.75rem; overflow: hidden; }
+        #console-output::-webkit-scrollbar { width: 6px; }
+        #console-output::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-[#1a1c1e] text-gray-200 font-sans">
+
+    <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">
+        <nav class="flex justify-between items-center px-8 py-6 max-w-6xl mx-auto">
+            <h1 class="text-2xl font-bold tracking-tighter text-white">
+                DSCL<span class="text-blue-500">_</span><span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">PLAYGROUND</span>
+            </h1>
+            <button id="menu-toggle" class="text-white focus:outline-none">
+                <svg id="menu-icon" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-[#1e2024] border-b border-blue-500/20 shadow-2xl z-50">
+            <div class="flex flex-col p-6 space-y-4">
+                <a href="../" class="text-gray-300 hover:text-blue-400 transition">Home</a>
+                <a href="../features/" class="text-gray-300 hover:text-blue-400 transition">Features</a>
+                <a href="https://github.com/H1387Lmao/DSCL" class="text-blue-400 font-bold">GitHub</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-12">
+        <div id="status-card" class="mb-8 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div id="status-dot" class="w-3 h-3 rounded-full bg-yellow-500 animate-pulse"></div>
+                <span id="status-text" class="text-sm font-medium text-blue-100">Loading Pyodide & PLY...</span>
+            </div>
+            <div id="spinner" class="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+            <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest">DSCL Source</h3>
+                    <button id="run-btn" disabled class="px-6 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-500 text-white text-xs font-bold rounded-lg transition-all transform active:scale-95 shadow-lg shadow-blue-500/20">
+                        COMPILE
+                    </button>
+                </div>
+                <div id="input-editor" class="editor-container"></div>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest">Transpiled Python</h3>
+                <div id="output-editor" class="editor-container"></div>
+            </div>
+        </div>
+
+        <div class="mt-8 space-y-4">
+            <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest">Compiler Logs & AST</h3>
+            <div id="console-output" class="bg-[#0d0e10] p-6 rounded-xl font-mono text-sm text-emerald-500 border border-gray-800 h-48 overflow-y-auto shadow-inner">
+                Initializing compiler system...
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <script>
+        let pyodide;
+        let inputEditor, outputEditor;
+        // Using raw content URL from master branch
+        const REPO_RAW = "https://raw.githubusercontent.com/H1387Lmao/DSCL/master/";
+        
+        // Ensure pathing matches your GitHub structure
+        const DEPENDENCIES = ['main.py', 'src/lexer.py', 'src/parser.py', 'src/codegen.py']; 
+
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            inputEditor = monaco.editor.create(document.getElementById('input-editor'), {
+                value: 'use pkg::discord\n\nconst bot = new Bot("!", new Intents(message_content=True))\n\ncmd ping() -> bot {\n    this->respond("Pong!")\n}\n\nbot->run("TOKEN")',
+                language: 'rust',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                fontSize: 14,
+                padding: { top: 20 }
+            });
+
+            outputEditor = monaco.editor.create(document.getElementById('output-editor'), {
+                value: '',
+                language: 'python',
+                theme: 'vs-dark',
+                readOnly: true,
+                automaticLayout: true,
+                fontSize: 14,
+                padding: { top: 20 }
+            });
+        });
+
+        async function init() {
+            try {
+                pyodide = await loadPyodide();
+                await pyodide.loadPackage("micropip");
+                const micropip = pyodide.pyimport("micropip");
+                
+                updateStatus("Installing PLY...", "yellow");
+                await micropip.install("ply");
+
+                updateStatus("Fetching Repository Files...", "yellow");
+                for (const file of DEPENDENCIES) {
+                    const resp = await fetch(REPO_RAW + file);
+                    if (!resp.ok) throw new Error(`Failed to fetch ${file}`);
+                    const text = await resp.text();
+
+                    // DIRECTORY CREATION LOGIC
+                    if (file.includes('/')) {
+                        const parts = file.split('/');
+                        let currentPath = '';
+                        for (let i = 0; i < parts.length - 1; i++) {
+                            currentPath += (currentPath ? '/' : '') + parts[i];
+                            try {
+                                pyodide.FS.mkdir(currentPath);
+                            } catch (e) {} // Path exists
+                        }
+                    }
+
+                    pyodide.FS.writeFile(file, text);
+                }
+
+                updateStatus("Ready to Compile", "emerald");
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('run-btn').disabled = false;
+                logToConsole("System initialized. You can now compile DSCL code.");
+            } catch (err) {
+                updateStatus("Load Error", "red");
+                logToConsole("Error during initialization: " + err.message);
+            }
+        }
+
+        function updateStatus(text, color) {
+            document.getElementById('status-text').innerText = text;
+            const dot = document.getElementById('status-dot');
+            dot.className = `w-3 h-3 rounded-full bg-${color}-500 animate-pulse`;
+        }
+
+        function logToConsole(msg) {
+            const consoleBox = document.getElementById('console-output');
+            consoleBox.innerText += `\n> ${msg}`;
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        document.getElementById('run-btn').onclick = async () => {
+            const code = inputEditor.getValue();
+            pyodide.FS.writeFile('input.dscl', code);
+            logToConsole("Transpiling...");
+
+            try {
+                // Ensure sys.path includes the 'src' folder so imports work in Pyodide
+                const pyResult = await pyodide.runPythonAsync(`
+import sys
+import os
+import io
+
+# Add 'src' to search path
+sys.path.append(os.path.join(os.getcwd(), "src"))
+sys.argv=["main.py", "compile","input.dscl", "-o", "output.dscl"]
+import main
+
+# Redirect stdout to capture compiler prints
+new_stdout = io.StringIO()
+sys.stdout = new_stdout
+
+try:
+    result = main.main()
+    logs = new_stdout.getvalue()
+except Exception as e:
+    result = f"# Compilation Error:\\n{str(e)}"
+    logs = str(e)
+
+[result, logs]
+                `);
+
+                outputEditor.setValue(pyResult.get(0));
+                logToConsole(pyResult.get(1) || "Done.");
+            } catch (err) {
+                logToConsole("Runtime Error: " + err.message);
+            }
+        };
+
+        document.getElementById('menu-toggle').onclick = () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        };
+
+        init();
+    </script>
+</body>
+</html>
