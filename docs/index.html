@@ -20,18 +20,19 @@
         /* Height Fix: Ensures code background fills the window */
         pre, code { height: 100%; }
         code { display: block; }
+
+        /* Custom Scrollbar for the Roadmap Table on Mobile */
+        .custom-scrollbar::-webkit-scrollbar { height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1a1c1e; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-[#1a1c1e] text-gray-200 font-sans overflow-x-hidden"> <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">
+<body class="bg-[#1a1c1e] text-gray-200 font-sans overflow-x-hidden">
+
+    <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">
         <nav class="flex justify-between items-center px-8 py-6 max-w-6xl mx-auto">
             <h1 class="text-2xl font-bold tracking-tighter text-white">
-                DSCL
-                <span class="text-blue-500">
-                    _
-                </span>
-                <span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500">
-                    v1.34
-                </span>
+                DSCL<span class="text-blue-500">_</span><span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">v1.34</span>
             </h1>
 
             <div class="flex items-center">
@@ -43,9 +44,9 @@
             </div>
         </nav>
 
-        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-[#1e2024] border-b border-blue-500/20 shadow-2xl">
+        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-[#1e2024] border-b border-blue-500/20 shadow-2xl z-50">
             <div class="flex flex-col p-6 space-y-4">
-                <a href="features/" class="nav-link text-gray-300 hover:text-blue-400 transition py-2">Features</a>
+                <a href="features.html" class="nav-link text-gray-300 hover:text-blue-400 transition py-2">Features</a>
                 <a href="#install" class="nav-link text-gray-300 hover:text-blue-400 transition py-2">Install</a>
                 <a href="#examples" class="nav-link text-gray-300 hover:text-blue-400 transition py-2">Examples</a>
                 <hr class="border-gray-800">
@@ -102,16 +103,13 @@ bot->run(TOKEN)</code></pre>
                 <h3 class="text-3xl font-bold mb-8 text-white">Get Started</h3>
                 <div class="grid md:grid-cols-2 gap-8">
                     <div class="space-y-4">
-                        <p class="text-gray-400">Clone the repository and install dependencies to begin compiling your DSCL scripts.</p>
-                        <div class="bg-black p-4 rounded-lg font-mono text-sm text-emerald-400 border border-emerald-900/30 whitespace-pre-wrap">git clone https://github.com/H1387Lmao/DSCL.git<br>
-cd DSCL<br>
-pip install -r requirements.txt
-                        </div>
+                        <p class="text-gray-400">Clone the repository and install dependencies.</p>
+                        <div class="bg-black p-4 rounded-lg font-mono text-sm text-emerald-400 border border-emerald-900/30 whitespace-pre-wrap break-all">git clone https://github.com/H1387Lmao/DSCL.git<br>cd DSCL<br>pip install -r requirements.txt</div>
                     </div>
                     <div class="space-y-4">
                         <h4 class="text-xl font-semibold text-white">Compilation</h4>
-                        <p class="text-sm text-gray-400 italic">Current version defaults to Pycord syntax.</p>
-                        <div class="bg-black p-4 rounded-lg font-mono text-sm text-blue-400 border border-blue-900/30 whitespace-pre-wrap">python main.py compile test.dscl -o test.py</div>
+                        <p class="text-sm text-gray-400 italic">Defaults to Pycord syntax.</p>
+                        <div class="bg-black p-4 rounded-lg font-mono text-sm text-blue-400 border border-blue-900/30 whitespace-pre-wrap break-all">python main.py compile test.dscl -o test.py</div>
                     </div>
                 </div>
             </div>
@@ -119,27 +117,31 @@ pip install -r requirements.txt
 
         <section id="roadmap" class="max-w-4xl mx-auto px-8 py-20">
             <h3 class="text-3xl font-bold mb-8 text-white">Roadmap</h3>
-            <div class="overflow-x-auto rounded-xl border border-gray-700"> <table class="w-full text-left bg-[#24262b] min-w-[400px]"> <thead class="bg-[#1e2024] text-gray-400 uppercase text-xs">
-                        <tr>
-                            <th class="px-6 py-4">Feature</th>
-                            <th class="px-6 py-4">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-700">
-                        <tr>
-                            <td class="px-6 py-4">Transpiler for Pycord</td>
-                            <td class="px-6 py-4 text-emerald-400 font-bold">✓ Ready</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4">Components V2 Integration</td>
-                            <td class="px-6 py-4 text-yellow-500 font-bold">W.I.P</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4">Custom Discord Library</td>
-                            <td class="px-6 py-4 text-gray-500 font-bold">Planned</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="rounded-xl border border-gray-700 overflow-hidden">
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left bg-[#24262b] min-w-[500px] md:min-w-0">
+                        <thead class="bg-[#1e2024] text-gray-400 uppercase text-xs">
+                            <tr>
+                                <th class="px-6 py-4">Feature</th>
+                                <th class="px-6 py-4 text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            <tr>
+                                <td class="px-6 py-4">Transpiler for Pycord</td>
+                                <td class="px-6 py-4 text-right text-emerald-400 font-bold">✓ Ready</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4">Components V2 Integration</td>
+                                <td class="px-6 py-4 text-right text-yellow-500 font-bold">W.I.P</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4">Custom Discord Library</td>
+                                <td class="px-6 py-4 text-right text-gray-500 font-bold">Planned</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
     </main>
@@ -168,9 +170,7 @@ pip install -r requirements.txt
 
         navLinks.forEach(link => {
             link.addEventListener('click', () => {
-                if (!mobileMenu.classList.contains('hidden')) {
-                    toggleMenu();
-                }
+                if (!mobileMenu.classList.contains('hidden')) toggleMenu();
             });
         });
     </script>
