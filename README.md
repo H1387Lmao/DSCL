@@ -1,7 +1,7 @@
 # DSCL (Programming Language)
 [![DSCL - Website](https://img.shields.io/badge/DSCL-Website-blueviolet)](https://h1387lmao.github.io/DSCL)
 [![dependency - ply](https://img.shields.io/badge/dependency-ply-blue?logo=python&logoColor=white)](https://pypi.org/project/ply)
-![License](https://img.shields.io/badge/License-None-green)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 
 [DSCL](https://h1387lmao.github.io/DSCL) is a programming language for making discord bots
