@@ -41,7 +41,7 @@
             </button>
         </nav>
 
-        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-[#1e2024] border-b border-blue-500/20 shadow-2xl z-50">
+        <div id="mobile-menu" class="hidden absolute overflow-y-auto top-full left-0 w-full bg-[#1e2024] border-b border-blue-500/20 shadow-2xl z-50">
             <div class="flex flex-col p-6 space-y-6">
                 <div class="flex flex-col space-y-3">
                     <span class="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Menu</span>
@@ -76,34 +76,8 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="features.js"></script>
     <script>
-        const features = [
-            {
-                title: "Command System",
-                description: "Creating commands is simple with the `cmd` keyword. DSCL handles the `async def` and `ctx` boilerplate for you.",
-                dscl: `cmd greet(User: member) -> bot {\n    this->respond("Hi %s" % member)\n}`,
-                python: `@bot.slash_command()\nasync def greet(ctx, member: discord.Member):\n    await ctx.respond(f"Hi {member}")`
-            },
-            {
-                title: "Variables & Assignment",
-                description: "DSCL uses `mut` and `const`. Transpilation ensures Python's naming conventions and scope logic are followed.",
-                dscl: `mut count = 0\nconst TOKEN = "XYZ"\n\ncount = count + 1`,
-                python: `count = 0\nTOKEN = "XYZ"\n\ncount = count + 1`
-            },
-            {
-                title: "For Loops",
-                description: "Creating for loops is easy using arrays or ranges with the `->` operator.",
-                dscl: `for i: 1->10{\n  print(i)\n}\nfor 1->5{}\nfor i: my_array{}`,
-                python: `for i in range(1,10):\n  print(i)\nfor _ in range(1,5):\n  pass\nfor i in my_array:\n  pass`
-            },
-            {
-                title: "Packages & Imports",
-                description: "DSCL allows simple packages and native imports with the `use` keyword and `->` member access.",
-                dscl: `use pkg::discord\nuse random\nuse time\n\ntime->sleep(.67)\nprint(random->randint(1,500))`,
-                python: `from discord.ext import commands\nfrom discord import Intents\nimport random\nimport time\n\ntime.sleep(0.67)\nprint(random.randint(1,500))`
-            },
-        ];
-
         const container = document.getElementById('features-container');
         const navContainer = document.getElementById('nav-links-container');
 
