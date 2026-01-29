@@ -1,14 +1,30 @@
-for i: 1 -> 100{
-	if i == 67{
-		print("SIX SEVENNNN") //kms omfg
-	}elseif i==21{
-		print("9+10")
-	}else{
-		print(i)
+fn test(){
+	for i: 1->100{
+		if i==67{
+			print("SIX SEVENNNN") //kms omfg
+		}elseif i==21{
+			print("9+10")
+		}else{
+			print(i)
+		}
 	}
 }
+
+async fn test_but_asynchronous(){
+	print("hello!")
+}
+
 mut b = (3+2)*2
 while b!=0{
 	print(b)
 	b = b-1
 }
+
+// test lambda
+
+mut a = fn (){
+}
+
+test()
+test_but_asynchronous()
+a()

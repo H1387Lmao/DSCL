@@ -1,16 +1,20 @@
-from discord.ext import commands
-from discord import Intents
+from dscl.runtime import *
+from dscl.discord import *
 import random
 intents = Intents()
 prefix = "!"
 TOKEN = "MY_VERY_SECRET_TOKEN"
-intents.on_messages=True
+intents.message_content = True
 bot = Bot(
   prefix, 
   intents
 )
 @bot.slash_command
-async def hello(this, person: discord.Member):
+async def hello(this, personUser):
+  if (person.bot):
+    this.respond("Hi fellow bot!")
+  else:
+    this.respond("Hi%s" % person)
 @bot.slash_command
 async def roll_dice(this, min: int, max: int):
   number = random.randint(min, max)

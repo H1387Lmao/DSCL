@@ -1,46 +1,62 @@
 from src.lexer import *
 from src.parser import *
 from src.codegen import *
-
 import sys
 import argparse
+import pathlib
 
-argparser = argparse.ArgumentParser()
-argparser.add_argument(nargs="?", dest="i")
-argparser.add_argument("-o", "-output")
-argparser.add_argument("-db", "-debug", dest='db', action="store_true")
-
-args = argparser.parse_args()
-
-if args.i is None:
-    print(
-        parser.parse(input(">> "))
-    )
-else:
-    o = open(args.i)
-
-    ast=parser.parse(
-        o.read()
-    )
-    o.close()
-    print(ast) if args.db else 0
-
-if args.o:
-    target = args.o
-else:
-    if args.i:
-        target = ".".join(args.i.split(".")[:-1])+'.py'
+def compile_dscl(args):
+    if args.i is None:
+        ast = parser.parse(input(">> "))
     else:
-        target = None
-
-if ast:
+        with open(args.i, "r", encoding="utf-8") as f:
+            ast = parser.parse(f.read())
+    if args.db:
+        print(ast)
+    if not ast:
+        return
     res = BaseGenerator(ast).compile()
     if args.db:
         print(res)
+    if args.o:
+        target = args.o
+    else:
+        if args.i:
+            target = ".".join(args.i.split(".")[:-1]) + ".py"
+        else:
+            target = None
+    if target:
+        with open(target, "w", encoding="utf-8") as f:
+            f.write(res)
+        print(f"[{Green}COMPILED{Reset}] Successfully wrote {len(res.splitlines())} lines to {target}")
 
-if target:
-    o = open(target, "w")
-o.write(res)
-o.close()
+def run_python(file_path: str):
+    file = pathlib.Path(file_path).resolve()
+    if not file.exists():
+        print(f"{Red}Error: file not found: {file}")
+        sys.exit(1)
+    root = pathlib.Path(__file__).resolve().parent
+    sys.path.insert(0, str(root))
+    sys.path.insert(0, str(file.parent))
+    globals_dict = {"__file__": str(file), "__name__": "__main__"}
+    with open(file, "r", encoding="utf-8") as f:
+        src = f.read()
+    exec(compile(src, str(file), "exec"), globals_dict)
 
-print(f"[{Green}COMPILED{Reset}] Successfully wrote {len(res.split("\n"))} lines to {target}")
+def main():
+    parser = argparse.ArgumentParser(prog="dscl")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+    c = sub.add_parser("compile")
+    c.add_argument("i", nargs="?")
+    c.add_argument("-o", "--output", dest="o")
+    c.add_argument("-db", "--debug", dest="db", action="store_true")
+    r = sub.add_parser("run")
+    r.add_argument("file")
+    args = parser.parse_args()
+    if args.cmd == "compile":
+        compile_dscl(args)
+    elif args.cmd == "run":
+        run_python(args.file)
+
+if __name__ == "__main__":
+    main()

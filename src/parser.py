@@ -75,15 +75,40 @@ def p_cmd_def(p):
     """
     p[0] = Ast('cmd_decl', name=p[2], args=p[4], stmts=p[8], target=p[7])
 
+def p_func_decl(p):
+    """
+    fn_decl : fn ID LPAREN params RPAREN scope
+    """
+    p[0] = Ast('fn_decl', is_async=False, name=p[2], args=p[4], stmts=p[6])
+
+def p_func(p):
+    """
+    stmt : async fn_decl
+         | fn_decl
+    """
+    if len(p)==2:
+        p[0]=p[1]
+    else:
+        p[2].is_async=True
+        p[0]=p[2]
+
+def p_lambda(p):
+    """
+    expr : fn LPAREN params RPAREN scope
+    """
+    p[0] = Ast('lambda_decl', is_async=False, name=None, args=p[3], stmts=p[5])
+
 def p_call(p):
     """
-    expr : expr LPAREN args RPAREN
+    expr : await expr LPAREN args RPAREN
+         | expr LPAREN args RPAREN
     """
-    p[0] = Ast('call', name=p[1], args=p[3])
+    n=1 if len(p)==6 else 0
+    p[0] = Ast('call', name=p[n+1], args=p[n+3], awaited=n==1)
 
 def p_construct(p):
     """
-    expr : new ID LPAREN args RPAREN
+    expr : new expr LPAREN args RPAREN
     """
     p[0] = Ast('construct', name=p[2], args=p[4])
 
@@ -151,7 +176,7 @@ def p_param(p):
 
 def p_args_empty(p):
     """
-    args :
+    arg_list :
     """
     p[0] = []
 
@@ -163,15 +188,22 @@ def p_args_list(p):
 
 def p_arg_list_single(p):
     """
-    arg_list : expr
+    arg_list : arg_entry
     """
     p[0] = [p[1]]
 
 def p_arg_list_multi(p):
     """
-    arg_list : arg_list COMMA expr
+    arg_list : arg_list COMMA arg_entry
     """
     p[0] = p[1] + [p[3]]
+
+def p_arg_entry(p):
+    """
+    arg_entry : expr
+              | ID EQUALS expr
+    """
+    p[0]=p[1:]
 
 def p_expr_binop(p):
     """
@@ -202,6 +234,7 @@ def p_expr_string(p):
 def p_expr_group(p):
     """
     expr : LPAREN expr RPAREN
+         | LBRACKET arg_list RBRACKET
     """
     p[0] = Ast("group", target=p[2])
 
@@ -385,10 +418,20 @@ def p_for(p):
         stmts=stmts
     )
 
+def p_access(p):
+    """
+    expr : expr LBRACKET expr RBRACKET
+    """
+    p[0]=Ast(
+        "access",
+        parent=p[1],
+        target=p[3]
+    )
+
 def p_error(p):
     if p:
         raise SyntaxError(f"Syntax error '{p.value}' at Line: {p.lexer.lineno}")
     else:
         raise SyntaxError("Syntax error at EOF")
 
-parser = yacc.yacc()
+parser = yacc.yacc(debug=False)

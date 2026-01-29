@@ -5,10 +5,10 @@ const intents = new Intents()
 const prefix = "!"
 const TOKEN = "MY_VERY_SECRET_TOKEN"
 
-intents->on_messages=True
+intents->message_content=True
 
 const bot = new Bot(
-	prefix,
+	prefix=prefix,
 	intents
 )
 

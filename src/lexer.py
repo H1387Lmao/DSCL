@@ -6,7 +6,8 @@ tokens = (
 )
 
 keywords = (
-    'cmd', 'fn',
+    'cmd', 'fn', 
+    'async', 'await',
     'User', 'str', 'num', 
     'const', 'mut',
     'new',
@@ -30,6 +31,7 @@ symbols = {
     ",": "COMMA",
     " ()": "PAREN",
     f" {'{}'}": "BRACE", #hacky fix for lite-xl's incorrect syntax highlighter
+    " []":"BRACKET",
     "::": "DOUBLECOLON",
     "==": "EQS",
     "!=": "NEQS",

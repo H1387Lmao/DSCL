@@ -1,21 +1,28 @@
 from .parser import Ast, Red, Reset, Blue, Yellow, Green, Gray, Purple
+import sys
 
 class BaseGenerator:
     def __init__(self, ast):
         self.ast = ast
 
         self.scopes = [{}]
+        self.lambdas=0
 
     def compile(self):
         self.code = ""
+
+        self._add_line("from dscl.runtime import *")
 
         self.compile_statements(self.ast.stmts)
 
         return self.code
 
     def compile_statements(self, stmts):
-        for stmt in stmts:
-            self.compile_statement(stmt)
+        if stmts:
+            for stmt in stmts:
+                self.compile_statement(stmt)
+        else:
+            self._add_line("pass")
 
     def _add_line(self, line):
         self.code += self.i+line + '\n'
@@ -23,9 +30,39 @@ class BaseGenerator:
     def _add(self, text):
         self.code += text
 
+    def compile_arg(self, arg):
+        if len(arg)==1:
+            return self.compile_expr(arg[0])
+        else:
+            return arg[0]+"="+self.compile_expr(arg[2])
+
+    def sort_args(self, arguments):
+        args = []
+        kwargs = []
+
+        for _arg in arguments:
+            arg = self.compile_arg(_arg)
+            if isinstance(arg, str) and "=" in arg:
+                kwargs.append(
+                    arg
+                )
+            else:
+                args.append(
+                    arg
+                )
+        return args + kwargs
+    def compile_args(self, args):
+        res=""
+        args = self.sort_args(args)
+        for arg in args:
+            res+=str(arg)+", "
+        return res.rstrip(", ")
+
     def compile_call(self, expr, is_line=False):
         name = self.compile_expr(expr.name)
-        res = f"{name}({", ".join(map(self.compile_expr, expr.args))})"
+        args = self.compile_args(expr.args)
+        awaited = "await " if expr.awaited else ""
+        res = awaited+name+f"({args})"
         if not is_line:
             return res
         else:
@@ -34,6 +71,8 @@ class BaseGenerator:
     def compile_expr(self, expr):
         if isinstance(expr, str):
             return expr.strip()
+        if isinstance(expr, list):
+            return self.compile_args(expr)
         if not isinstance(expr, Ast):
             return expr
         match expr.n:
@@ -46,24 +85,34 @@ class BaseGenerator:
                 return '"'+expr.value+'"'
             case "construct":
                 if expr.args:
-                    res = f"{expr.name}(\n{self.i}  {f", \n{self.i}  ".join(map(self.compile_expr, expr.args))}\n{self.i})"
+                    res = f"{self.compile_expr(expr.name)}("
+                    args = self.compile_args(expr.args)
+                    res+=args+")"
                 else:
-                    res = f"{expr.name}()"
+                    res = f"{self.compile_expr(expr.name)}()"
                 return res
             case "getattr":
                 if not isinstance(expr.root, list):
                     expr.root = [expr.root]
                 expr.root.append(expr.target)
                 return '.'.join(expr.root)
+            case "access":
+                return f"{self.compile_expr(expr.parent)}[{self.compile_expr(expr.target)}]"
             case "call":
                 return self.compile_call(expr)
             case "group":
-                return f"({self.compile_expr(expr.target)})"
+                p = "Table" if isinstance(expr.target, list) else ""
+                return f"{p}({self.compile_expr(expr.target)})"
             case "range":
                 left = self.compile_expr(expr.min)
                 right = self.compile_expr(expr.max)
 
                 return f"range({left}, {right})"
+            case "lambda_decl":
+                self.lambdas += 1
+                expr.name="lamdba_"+str(self.lambdas)
+                self.compile_fn(expr)
+                return expr.name
             case _:
                 print("unknown\n", expr)
                 return ""
@@ -72,16 +121,16 @@ class BaseGenerator:
     def i(self):
         return (len(self.scopes)-1)*"  "
 
+    @property
+    def i2(self):
+        return len(self.scopes)*"  "
+
     def compile_param_type(self, type):
         match type:
-            case "User":
-                return ": discord.Member"
-            case "str":
-                return ": str"
             case "num":
                 return ": int"
             case _:
-                return ""
+                return type
 
     def compile_params(self, args, is_command=False):
         res = "" if not is_command else "this, "
@@ -107,6 +156,19 @@ class BaseGenerator:
         for i in range(len(self.scopes)-1, -1, -1):
             if n in self.scopes[i]:
                 return self.scopes[i][n]
+    def compile_fn(self, stmt, is_cmd=False):
+        if not is_cmd:
+            _async = "async " if stmt.is_async else ""
+        else:
+            _async = "async "
+
+        self._add_line(f"{_async}def {stmt.name}({self.compile_params(stmt.args, is_cmd)}):")
+        self.scopes[-1][stmt.name]=("func", stmt.is_async)
+        self.scopes.append({})
+
+        self.compile_statements(stmt.stmts)
+    
+        self.scopes.pop()
 
     def compile_statement(self, stmt):
         match stmt.n:
@@ -121,12 +183,9 @@ class BaseGenerator:
 
             case "cmd_decl":
                 self._add_line(f"@{stmt.target}.slash_command")
-                self._add_line(f"async def {stmt.name}({self.compile_params(stmt.args, True)}):")
-                self.scopes.append({})
-
-                self.compile_statements(stmt.stmts)
-                
-                self.scopes.pop()
+                self.compile_fn(stmt, True)
+            case "fn_decl":
+                self.compile_fn(stmt)
             case "var_resign":
                 name = self.compile_expr(stmt.name)
                 value = self.compile_expr(stmt.value)
@@ -134,7 +193,6 @@ class BaseGenerator:
                     v = self.search_var(name)
                     if v is None:
                         print(f"{Red}[COMPILER]{Reset} Can't reassign variable that hasnt been declared yet!")
-                        #print(stmt)
                         return
                     elif v[0] == "const":
                         print(f"{Red}[COMPILER]{Reset} Can't reassign variable that is a constant!")
@@ -143,8 +201,7 @@ class BaseGenerator:
             case "usepkg":
                 match stmt.target:
                     case "discord":
-                        self._add_line("from discord.ext import commands")
-                        self._add_line("from discord import Intents")
+                        self._add_line("from dscl.discord import *")
                     case _:
                         print(f"{Red}[COMPILER]{Reset}Unknown package: '{stmt.target}'")
                         return
@@ -170,4 +227,4 @@ class BaseGenerator:
                 self.compile_statements(stmt.stmts)
                 self.scopes.pop()
             case _:
-                self.compile_expr(stmt)
+                self._add_line(self.compile_expr(stmt))
