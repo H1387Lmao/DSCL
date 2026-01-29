@@ -58,5 +58,4 @@ def main():
     elif args.cmd == "run":
         run_python(args.file)
 
-if __name__ == "__main__":
-    main()
+main()

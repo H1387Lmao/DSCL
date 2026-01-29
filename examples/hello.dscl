@@ -17,7 +17,6 @@ cmd hello(User: person) -> bot{
 		this->respond("Hi fellow bot!")
 	}else {
 		this->respond("Hi%s" % person)
-
 	}
 }
 
