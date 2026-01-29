@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
     <style>
         html { scroll-behavior: smooth; }
-        /* Optional: Add a smooth fade-in for the dropdown */
+        
         #mobile-menu:not(.hidden) {
             animation: slideDown 0.2s ease-out;
         }
@@ -16,14 +16,22 @@
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Height Fix: Ensures code background fills the window */
+        pre, code { height: 100%; }
+        code { display: block; }
     </style>
 </head>
-<body class="bg-[#1a1c1e] text-gray-200 font-sans">
-
-    <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">
+<body class="bg-[#1a1c1e] text-gray-200 font-sans overflow-x-hidden"> <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">
         <nav class="flex justify-between items-center px-8 py-6 max-w-6xl mx-auto">
             <h1 class="text-2xl font-bold tracking-tighter text-white">
-                DSCL<span class="text-blue-500">_</span><span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500">v1.01</span>
+                DSCL
+                <span class="text-blue-500">
+                    _
+                </span>
+                <span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-emerald-500">
+                    v1.29
+                </span>
             </h1>
 
             <div class="flex items-center">
@@ -95,7 +103,7 @@ bot->run(TOKEN)</code></pre>
                 <div class="grid md:grid-cols-2 gap-8">
                     <div class="space-y-4">
                         <p class="text-gray-400">Clone the repository and install dependencies to begin compiling your DSCL scripts.</p>
-                        <div class="bg-black p-4 rounded-lg font-mono text-sm text-emerald-400 border border-emerald-900/30">
+                        <div class="bg-black p-4 rounded-lg font-mono text-sm text-emerald-400 border border-emerald-900/30 break-all whitespace-pre-wrap">
                             git clone https://github.com/H1387Lmao/DSCL.git<br>
                             cd DSCL<br>
                             pip install -r requirements.txt
@@ -104,7 +112,7 @@ bot->run(TOKEN)</code></pre>
                     <div class="space-y-4">
                         <h4 class="text-xl font-semibold text-white">Compilation</h4>
                         <p class="text-sm text-gray-400 italic">Current version defaults to Pycord syntax.</p>
-                        <div class="bg-black p-4 rounded-lg font-mono text-sm text-blue-400 border border-blue-900/30">
+                        <div class="bg-black p-4 rounded-lg font-mono text-sm text-blue-400 border border-blue-900/30 break-all whitespace-pre-wrap">
                             python main.py compile test.dscl -o test.py
                         </div>
                     </div>
@@ -114,9 +122,7 @@ bot->run(TOKEN)</code></pre>
 
         <section id="roadmap" class="max-w-4xl mx-auto px-8 py-20">
             <h3 class="text-3xl font-bold mb-8 text-white">Roadmap</h3>
-            <div class="overflow-hidden rounded-xl border border-gray-700">
-                <table class="w-full text-left bg-[#24262b]">
-                    <thead class="bg-[#1e2024] text-gray-400 uppercase text-xs">
+            <div class="overflow-x-auto rounded-xl border border-gray-700"> <table class="w-full text-left bg-[#24262b] min-w-[400px]"> <thead class="bg-[#1e2024] text-gray-400 uppercase text-xs">
                         <tr>
                             <th class="px-6 py-4">Feature</th>
                             <th class="px-6 py-4">Status</th>
@@ -156,8 +162,6 @@ bot->run(TOKEN)</code></pre>
 
         function toggleMenu() {
             const isHidden = mobileMenu.classList.toggle('hidden');
-
-            // Toggle between hamburger icon and X icon
             menuIcon.innerHTML = isHidden
                 ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>'
                 : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
@@ -165,7 +169,6 @@ bot->run(TOKEN)</code></pre>
 
         menuToggle.addEventListener('click', toggleMenu);
 
-        // Auto-close menu when a link is clicked
         navLinks.forEach(link => {
             link.addEventListener('click', () => {
                 if (!mobileMenu.classList.contains('hidden')) {

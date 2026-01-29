@@ -13,7 +13,7 @@
 
         /* Smooth transition for code swapping */
         .code-container { position: relative; overflow: hidden; }
-        .code-view { transition: opacity 0.2s ease, transform 0.2s ease; }
+        .code-view { min-height: 100%; transition: opacity 0.2s ease, transform 0.2s ease; }
         .hidden-view { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; transform: translateY(10px); }
 
         /* Dropdown Animation */
