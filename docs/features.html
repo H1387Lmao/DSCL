@@ -10,34 +10,70 @@
         html { scroll-behavior: smooth; }
         .feature-card { transition: all 0.3s ease; }
         .feature-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
-        
+
         /* Smooth transition for code swapping */
         .code-container { position: relative; overflow: hidden; }
         .code-view { transition: opacity 0.2s ease, transform 0.2s ease; }
         .hidden-view { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; transform: translateY(10px); }
+
+        /* Dropdown Animation */
+        #mobile-menu:not(.hidden) {
+            animation: slideDown 0.2s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-[#1a1c1e] text-gray-200 font-sans leading-relaxed">
 
-    <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">                                        
+    <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">                                
         <nav class="flex justify-between items-center px-8 py-6 max-w-6xl mx-auto">
             <h1 class="text-2xl font-bold tracking-tighter text-white">
                 DSCL<span class="text-blue-500">_</span><span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">FEATURES</span>
             </h1>
-            <a href="index.html" class="hover:text-blue-400 transition text-sm">Home</a>
+            
+            <button id="menu-toggle" class="text-white focus:outline-none">
+                <svg id="menu-icon" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
         </nav>
+
+        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-[#1e2024] border-b border-blue-500/20 shadow-2xl z-50">
+            <div class="flex flex-col p-6 space-y-6">
+                <div class="flex flex-col space-y-3">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Menu</span>
+                    <a href="index.html" class="text-lg font-medium hover:text-blue-400 transition">Home</a>
+                    <a href="https://github.com/H1387Lmao/DSCL" class="text-lg font-medium text-blue-400 hover:text-blue-300 transition">GitHub</a>
+                </div>
+
+                <hr class="border-gray-800">
+
+                <div class="flex flex-col space-y-3">
+                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Jump to Feature</span>
+                    <div id="nav-links-container" class="flex flex-col space-y-2">
+                        </div>
+                </div>
+            </div>
+        </div>
     </header>
 
     <main class="max-w-6xl mx-auto px-8 py-16">
         <div class="mb-16 text-center md:text-left">
             <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-4 italic">Language <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Features</span></h2>
             <p class="text-gray-400 text-lg max-w-2xl">
-                Here's some of the features DSCL has to offer.
+                Explore what <span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">DSCL</span> has the offer.
             </p>
         </div>
 
-        <div id="features-container" class="space-y-15"></div>
+        <div id="features-container" class="space-y-20"></div>
     </main>
+
+    <footer class="text-center py-10 text-gray-600 text-sm border-t border-gray-800 mt-20">
+        &copy; 2026 DSCL Project. Built for the Discord Developer community. By H1387Lmao♥
+    </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script>
@@ -56,40 +92,53 @@
             },
             {
                 title: "For Loops",
-                description: "Creating for loops is easy, using arrays or ranges",
+                description: "Creating for loops is easy using arrays or ranges with the `->` operator.",
                 dscl: `for i: 1->10{\n  print(i)\n}\nfor 1->5{}\nfor i: my_array{}`,
                 python: `for i in range(1,10):\n  print(i)\nfor _ in range(1,5):\n  pass\nfor i in my_array:\n  pass`
             },
             {
                 title: "Packages & Imports",
-                description: "DSCL allows simple packages and native imports with the `use` keyword.",
+                description: "DSCL allows simple packages and native imports with the `use` keyword and `->` member access.",
                 dscl: `use pkg::discord\nuse random\nuse time\n\ntime->sleep(.67)\nprint(random->randint(1,500))`,
                 python: `from discord.ext import commands\nfrom discord import Intents\nimport random\nimport time\n\ntime.sleep(0.67)\nprint(random.randint(1,500))`
             },
         ];
 
         const container = document.getElementById('features-container');
+        const navContainer = document.getElementById('nav-links-container');
 
         features.forEach((feature, index) => {
             const regex = /`([^`]+)`/g;
-            const styledDescription = feature.description.replace(regex, '<span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400 font-mono font-bold">$1</span>');
-
-            const card = document.createElement('section');
-            card.className = "feature-card grid md:grid-cols-2 gap-8 items-center bg-[#24262b] p-8 rounded-2xl border border-gray-700 shadow-2xl";
+            const styledDescription = feature.description.replace(regex, '<span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-yellow-400 font-mono font-bold">$1</span>');
             
+            const sectionId = feature.title.toLowerCase().replace(/\s+/g, '-');
+
+            // 1. Create Navigation Link
+            const navLink = document.createElement('a');
+            navLink.href = `#${sectionId}`;
+            navLink.className = "nav-link text-gray-400 hover:text-white transition text-sm py-1";
+            navLink.textContent = feature.title;
+            navContainer.appendChild(navLink);
+
+            // 2. Create Feature Card
+            const card = document.createElement('section');
+            card.id = sectionId;
+            card.className = "feature-card grid md:grid-cols-2 gap-8 items-center bg-[#24262b] p-8 rounded-2xl border border-gray-700 shadow-2xl scroll-mt-32";
+
             card.innerHTML = `
                 <div class="space-y-4">
                     <h3 class="text-2xl font-bold text-white tracking-tight">${feature.title}</h3>
                     <p class="text-gray-400 leading-relaxed">${styledDescription}</p>
                 </div>
-                
+
                 <div class="rounded-xl overflow-hidden border border-gray-800 bg-[#1e2024]">
                     <div class="flex items-center justify-between px-4 py-2 border-b border-gray-800 bg-[#1a1c1e]/50">
-                        <div class="flex space-x-1">
-                            <div class="w-2 h-2 rounded-full bg-red-500/30"></div>
-                            <div class="w-2 h-2 rounded-full bg-yellow-500/30"></div>
+                        <div class="flex space-x-1.5">
+                            <div class="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/40"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/40"></div>
+                            <div class="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/40"></div>
                         </div>
-                        
+
                         <div class="flex bg-black/40 p-1 rounded-md">
                             <button onclick="toggleCode(${index}, 'dscl')" id="btn-dscl-${index}" class="px-3 py-1 text-[10px] font-bold rounded transition bg-blue-600 text-white">DSCL</button>
                             <button onclick="toggleCode(${index}, 'py')" id="btn-py-${index}" class="px-3 py-1 text-[10px] font-bold rounded transition text-gray-500 hover:text-white">PYTHON</button>
@@ -124,6 +173,27 @@
                 dsclBtn.className = "px-3 py-1 text-[10px] font-bold rounded transition text-gray-400 hover:text-white";
             }
         };
+
+        // Menu Logic
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+
+        function toggleMenu() {
+            const isHidden = mobileMenu.classList.toggle('hidden');
+            menuIcon.innerHTML = isHidden
+                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>'
+                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
+        }
+
+        menuToggle.addEventListener('click', toggleMenu);
+
+        // Close menu when clicking a link
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.nav-link') || e.target.tagName === 'A') {
+                if (!mobileMenu.classList.contains('hidden')) toggleMenu();
+            }
+        });
 
         hljs.highlightAll();
     </script>
