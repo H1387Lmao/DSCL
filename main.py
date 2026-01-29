@@ -36,7 +36,7 @@ def compile(i, target):
     
     with open(target, "w") as f:
         f.write(BaseGenerator(ast).compile())
-    return AstView(ast, no_color=True)
+    return ast
 def run_python(file_path: str):
     file = pathlib.Path(file_path).resolve()
     if not file.exists():
