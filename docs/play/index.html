@@ -166,29 +166,39 @@
 
             try {
                 // Ensure sys.path includes the 'src' folder so imports work in Pyodide
-                const pyResult = await pyodide.runPythonAsync(`
+				const pyResult = await pyodide.runPythonAsync(`
 import sys
-import os
 import io
+import os
 
-# Add 'src' to search path
-sys.path.append(os.path.join(os.getcwd(), "src"))
-sys.argv=["main.py", "compile","input.dscl", "-o", "output.dscl"]
-import main
+# 1. Reset/Setup path
+if os.getcwd() not in sys.path:
+    sys.path.append(os.getcwd())
 
-# Redirect stdout to capture compiler prints
-new_stdout = io.StringIO()
-sys.stdout = new_stdout
+# 2. Capture output
+output_capture = io.StringIO()
+sys.stdout = output_capture
+sys.stderr = output_capture
 
 try:
-    result = main.main()
-    logs = new_stdout.getvalue()
-except Exception as e:
-    result = f"# Compilation Error:\\n{str(e)}"
-    logs = str(e)
+    import main
+    # Instead of sys.argv, pass arguments directly if your main.py supports it
+    # Or manually set argv before import    
+    # Use a try-except specifically for SystemExit which argparse triggers
+    try:
+        main.compile("input.dscl", "output.py")
+    except SystemExit:
+        pass 
 
-[result, logs]
-                `);
+    # Read the resulting file that your compiler wrote
+    with open("output.py", "r") as f:
+        compiled_code = f.read()
+    
+    logs = output_capture.getvalue()
+    [compiled_code, logs]
+except Exception as e:
+    ["# Error: " + str(e), str(e)]
+				`);
 
                 outputEditor.setValue(pyResult.get(0));
                 logToConsole(pyResult.get(1) || "Done.");
