@@ -14,22 +14,13 @@ Gray=Ansi+"90m"
 def AstView(node, prefix="", is_last=True, ITEM_NAME=None, no_color=False):
     if not isinstance(node, Ast):
         return ""
-    Yellow=Ansi+"93m"
-    Green=Ansi+"92m"
-    Red=Ansi+"91m"
-    Blue=Ansi+"96m"
-    Purple=Ansi+"94m"
-    Reset=Ansi+"0m"
-    Gray=Ansi+"90m"
-
-    if no_color:
-        Yellow=""
-        Green=""
-        Red=""
-        Blue=""
-        Purple=""
-        Reset=""
-        Gray=""
+    Yellow=Ansi+"93m" if not no_color else ""
+    Green=Ansi+"92m" if not no_color else ""
+    Red=Ansi+"91m" if not no_color else ""
+    Blue=Ansi+"96m" if not no_color else ""
+    Purple=Ansi+"94m" if not no_color else ""
+    Reset=Ansi+"0m" if not no_color else ""
+    Gray=Ansi+"90m" if not no_color else ""
 
     res = prefix
     name = ITEM_NAME+": " if ITEM_NAME is not None else ""
@@ -45,7 +36,7 @@ def AstView(node, prefix="", is_last=True, ITEM_NAME=None, no_color=False):
         last = i == len(items) - 1
 
         if isinstance(v, Ast):
-            res += AstView(v, child_prefix, last, ITEM_NAME=k)
+            res += AstView(v, child_prefix, last, ITEM_NAME=k, no_color=no_color)
 
         elif isinstance(v, list):
             res += child_prefix
@@ -56,7 +47,8 @@ def AstView(node, prefix="", is_last=True, ITEM_NAME=None, no_color=False):
                 res += AstView(
                     item,
                     child_prefix + ("    " if last else f"{Gray}│   {Reset}"),
-                    j == len(v) - 1
+                    j == len(v) - 1,
+                    no_color=no_color
                 )
 
         else:

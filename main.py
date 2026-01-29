@@ -12,7 +12,7 @@ def compile_dscl(args):
         with open(args.i, "r", encoding="utf-8") as f:
             ast = parser.parse(f.read())
     if args.db:
-        print(ast)
+        print(AstView(ast, no_color=True))
     if not ast:
         return
     res = BaseGenerator(ast).compile()
