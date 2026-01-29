@@ -13,8 +13,12 @@ keywords = (
     'new',
     'use', 'pkg',
     'if', 'else', 'elseif', 
-    'while', 'for'
+    'while', 'for', 'to', 'in'  
 )
+
+macros = {
+    "ctx": "this"
+}
 
 for kw in keywords:
     tokens += (kw,)
@@ -39,6 +43,7 @@ symbols = {
     "<=": "LEQS",
     "<" : "LT",
     ">" : "MT",
+    "." : "DOT",
 }
 
 for k,v in symbols.items():
@@ -69,6 +74,9 @@ def t_STR(t):
 
 def t_ID(t):
     r'[A-Za-z_][A-Za-z0-9_]*'
+    if t.value in macros:
+        t.value = macros[t.value]
+        return t
     if t.value in keywords:
         t.type = t.value
     return t

@@ -291,6 +291,8 @@ def p_getattr(p):
     """
     getattr : getattr ARROW ID
             | ID ARROW ID
+            | ID DOT ID
+            | getattr DOT ID
     """
     if isinstance(p[1], Ast):
         p[1]=[p[1].root, p[1].target]
@@ -424,6 +426,7 @@ def p_while(p):
 def p_range_expr(p):
     """
     expr : expr ARROW expr
+         | expr to expr
     """
     p[0]=Ast(
         "range",
@@ -433,6 +436,7 @@ def p_range_expr(p):
 def p_for(p):
     """
     stmt : for ID COLON expr scope
+         | for ID in expr scope
          | for expr scope
     """
     target = p[2] if len(p)==6 else None

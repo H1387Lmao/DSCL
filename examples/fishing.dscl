@@ -17,7 +17,7 @@ const fish_bot = new Bot(
 )
 
 cmd inv()->fish_bot{
-	const user = str(this->user->id)
+	const user = str(ctx->user->id)
 	const inv = caught[user]
 	mut text = ""
 	for fish: inv{

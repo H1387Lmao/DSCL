@@ -163,7 +163,6 @@ class BaseGenerator:
             _async = "async "
 
         self._add_line(f"{_async}def {stmt.name}({self.compile_params(stmt.args, is_cmd)}):")
-        print(stmt)
         self.scopes[-1][stmt.name]=("func", stmt.is_async)
         self.scopes.append({})
 
@@ -171,17 +170,20 @@ class BaseGenerator:
     
         self.scopes.pop()
 
+    def decl_var(self, stmt):
+        value = self.compile_expr(stmt.value)
+        name = self.compile_expr(stmt.name)
+        self._add_line(f"{name} = {value}")
+                
+        self.scopes[-1][name] = (stmt.type, value)
+
+
     def compile_statement(self, stmt):
         match stmt.n:
             case "import":
                 self._add_line(f"import {stmt.target}")
             case "var_decl":
-                value = self.compile_expr(stmt.value)
-                name = self.compile_expr(stmt.name)
-                self._add_line(f"{name} = {value}")
-                
-                self.scopes[-1][name] = (stmt.type, value)
-
+                self.decl_var(stmt)
             case "cmd_decl":
                 self._add_line(f"@{stmt.target}.slash_command")
                 self.compile_fn(stmt, True)
@@ -194,11 +196,11 @@ class BaseGenerator:
                 if '.' not in name:
                     v = self.search_var(name)
                     if v is None:
-                        print(f"{Red}[COMPILER]{Reset} Can't reassign variable that hasnt been declared yet!")
+                        stmt.type="mut"
+                        self.decl_var(stmt)
                         return
                     elif v[0] == "const":
-                        print(f"{Red}[COMPILER]{Reset} Can't reassign variable that is a constant!")
-                        return
+                        raise Exception("Tried to edit a constant variable!")
                 self._add_line(f"{name} {op} {value}")
             case "usepkg":
                 match stmt.target:

@@ -2,6 +2,8 @@ from dscl.runtime import *
 from dscl.discord import *
 from dscl.discord.ui import *
 import random
+fishes = Table("cod", "salmon", "pufferfish")
+caught = UserDatabase()
 fish_bot = Bot(prefix="!", intents=Intents(message_content=True))
 @fish_bot.slash_command
 async def inv(this):
