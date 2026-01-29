@@ -14,6 +14,14 @@ Gray=Ansi+"90m"
 def AstView(node, prefix="", is_last=True, ITEM_NAME=None, no_color=False):
     if not isinstance(node, Ast):
         return ""
+    Yellow=Ansi+"93m"
+    Green=Ansi+"92m"
+    Red=Ansi+"91m"
+    Blue=Ansi+"96m"
+    Purple=Ansi+"94m"
+    Reset=Ansi+"0m"
+    Gray=Ansi+"90m"
+
     if no_color:
         Yellow=""
         Green=""

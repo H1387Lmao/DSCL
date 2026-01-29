@@ -5,7 +5,7 @@ import random
 fish_bot = Bot(prefix="!", intents=Intents(message_content=True))
 @fish_bot.slash_command
 async def inv(this):
-  user = tostr(this.user.id)
+  user = str(this.user.id)
   inv = caught[user]
   text = ""
   for fish in inv:
