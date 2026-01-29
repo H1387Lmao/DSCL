@@ -29,7 +29,9 @@ def compile_dscl(args):
         with open(target, "w", encoding="utf-8") as f:
             f.write(res)
         print(f"[{Green}COMPILED{Reset}] Successfully wrote {len(res.splitlines())} lines to {target}")
-
+def process_code(source):
+    ast = parser.parse(source)
+    return (ast, BaseGenerator(ast).compile())
 def run_python(file_path: str):
     file = pathlib.Path(file_path).resolve()
     if not file.exists():
