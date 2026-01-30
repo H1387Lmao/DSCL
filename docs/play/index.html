@@ -119,15 +119,18 @@
                 const resp = await fetch(REPO_RAW + file);
                 if (!resp.ok) throw new Error(`Failed to fetch ${file}`);
                 const text = await resp.text();
-
                 if (file.includes('/')) {
                     const parts = file.split('/');
                     let currentPath = '';
                     for (let i = 0; i < parts.length - 1; i++) {
                         currentPath += (currentPath ? '/' : '') + parts[i];
-                        try { pyodide.FS.mkdir(currentPath); } catch (e) {}
+                        try { 
+                            pyodide.FS.mkdir(currentPath); 
+                            logToConsole("Made directory: "+currentPath)
+                        } catch (e) {}
                     }
                 }
+                logToConsole(file+" Downloaded")
                 pyodide.FS.writeFile(file, text);
             }
 
