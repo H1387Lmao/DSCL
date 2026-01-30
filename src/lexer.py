@@ -94,7 +94,8 @@ def t_comment(t):
 LexerLogger=Logger("Tokenizing")
 
 def t_error(t):
-    LexerError(LexerLogger, f"Unexpected character: '{t.value.replace('\n','')}'", t.lineno, t.lexpos)
+    t.value = t.value.replace("\n", "")
+    LexerError(LexerLogger, f"Unexpected character: '{t.value}'", t.lineno, t.lexpos)
     LexerLogger.exit_stage()
 
 lexer = lex.lex()
