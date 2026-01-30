@@ -1,5 +1,5 @@
-
-from .parser import Ast, Red, Reset, Blue, Yellow, Green, Gray, Purple
+from .hlog import Logger
+from .parser import Ast
 import sys
 
 class BaseGenerator:
@@ -9,12 +9,16 @@ class BaseGenerator:
         self.scopes = [{}]
         self.lambdas=0
 
+        self.logger=Logger("Code generation")
+
     def compile(self):
         self.code = ""
 
         self._add_line("from dscl.runtime import *")
 
         self.compile_statements(self.ast.stmts)
+
+        self.logger.exit_stage()
 
         return self.code
 
@@ -26,7 +30,7 @@ class BaseGenerator:
             self._add_line("pass")
 
     def _add_line(self, line):
-        self.code += self.i+line + '\n'
+        self.code += self.i+str(line) + '\n'
 
     def _add(self, text):
         self.code += text
@@ -116,7 +120,7 @@ class BaseGenerator:
                 self.compile_fn(expr)
                 return expr.name
             case _:
-                print("unknown\n", expr)
+                self.logger.error("Unknown Symbol\n", expr)
                 return ""
 
     @property
@@ -137,7 +141,6 @@ class BaseGenerator:
     def compile_params(self, args, is_command=False):
         res = "" if not is_command else "this, "
         for arg in args:
-            print(arg)
             res += f"{arg.name}{self.compile_param_type(arg.type)}, "
         return res.removesuffix(", ")
 
@@ -182,6 +185,9 @@ class BaseGenerator:
 
 
     def compile_statement(self, stmt):
+        if not isinstance(stmt, Ast):
+            self._add_line(self.compile_expr(stmt))
+            return 
         match stmt.n:
             case "import":
                 self._add_line(f"import {stmt.target}")
@@ -203,7 +209,7 @@ class BaseGenerator:
                         self.decl_var(stmt)
                         return
                     elif v[0] == "const":
-                        raise Exception("Tried to edit a constant variable!")
+                        self.logger.error("Tried to edit a constant variable!")
                 self._add_line(f"{name} {op} {value}")
             case "usepkg":
                 match stmt.target:
@@ -212,7 +218,7 @@ class BaseGenerator:
                     case "discordui":
                         self._add_line("from dscl.discord.ui import *")
                     case _:
-                        print(f"{Red}[COMPILER]{Reset}Unknown package: '{stmt.target}'")
+                        self.logger.error(f"Compiler: Unknown package: '{stmt.target}'")
                         return
             case "call":
                 self.compile_call(stmt, True)

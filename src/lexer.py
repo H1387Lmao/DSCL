@@ -1,5 +1,8 @@
 import ply.lex as lex
 import re
+from .hlog import *
+from .errors import *
+import sys
 
 tokens = (
     'ID', 'STR', 'NUM', 'FLT'
@@ -88,7 +91,10 @@ def t_newline(t):
 def t_comment(t):
     r'\/\/.*'
 
+LexerLogger=Logger("Tokenizing")
 
-def t_error(t): pass
+def t_error(t):
+    LexerError(LexerLogger, f"Unexpected character: '{t.value.replace('\n','')}'", t.lineno, t.lexpos)
+    LexerLogger.exit_stage()
 
 lexer = lex.lex()

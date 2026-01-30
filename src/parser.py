@@ -1,44 +1,17 @@
 import ply.yacc as yacc
 from .lexer import *
+from .errors import *
 
-Ansi="\033["
-
-Yellow=Ansi+"93m"
-Green=Ansi+"92m"
-Red=Ansi+"91m"
-Blue=Ansi+"96m"
-Purple=Ansi+"94m"
-Reset=Ansi+"0m"
-Gray=Ansi+"90m"
-
-def SET_COLOR(no_color):
-    global Yellow
-    global Green
-    global Red
-    global Blue
-    global Purple
-    global Reset
-    global Gray
-    Yellow=Ansi+"93m" if not no_color else ""
-    Green=Ansi+"92m" if not no_color else ""
-    Red=Ansi+"91m" if not no_color else ""
-    Blue=Ansi+"96m" if not no_color else ""
-    Purple=Ansi+"94m" if not no_color else ""
-    Reset=Ansi+"0m" if not no_color else ""
-    Gray=Ansi+"90m" if not no_color else ""
-
-
-def AstView(node, prefix="", is_last=True, ITEM_NAME=None, no_color=False):
+def AstView(node, prefix="", is_last=True, ITEM_NAME=None):
     if not isinstance(node, Ast):
         return ""
-    SET_COLOR(no_color)
     res = prefix
     name = ITEM_NAME+": " if ITEM_NAME is not None else ""
     if prefix:
-        res += f"{Gray}└── {Reset}" if is_last else f"{Gray}├── {Reset}"
-    res += f"{Blue}{name}Ast({node.n}){Reset}\n"
+        res += f"[gray]└── [?]" if is_last else f"[Gray]├── [?]"
+    res += f"[cyan]{name}Ast({node.n})[?]\n"
 
-    child_prefix = prefix + ("    " if is_last else f"{Gray}│   {Reset}")
+    child_prefix = prefix + ("    " if is_last else f"[Gray]│   [?]")
 
     items = [(k, v) for k, v in node.__dict__.items() if k != "n"]
 
@@ -46,25 +19,24 @@ def AstView(node, prefix="", is_last=True, ITEM_NAME=None, no_color=False):
         last = i == len(items) - 1
 
         if isinstance(v, Ast):
-            res += AstView(v, child_prefix, last, ITEM_NAME=k, no_color=no_color)
+            res += AstView(v, child_prefix, last, ITEM_NAME=k)
 
         elif isinstance(v, list):
             res += child_prefix
-            res += f"{Gray}└── {Reset}" if last else f"{Gray}├── {Reset}"
-            res += f"{Purple}{k} (List) \n{Reset}"
+            res += f"[Gray]└── [?]" if last else f"[Gray]├── [?]"
+            res += f"[Purple]{k} (List) \n[?]"
 
             for j, item in enumerate(v):
                 res += AstView(
                     item,
-                    child_prefix + ("    " if last else f"{Gray}│   {Reset}"),
+                    child_prefix + ("    " if last else f"[Gray]│   [?]"),
                     j == len(v) - 1,
-                    no_color=no_color
                 )
 
         else:
             res += child_prefix
-            res += f"{Gray}└── {Reset}" if last else f"{Gray}├── {Reset}"
-            res += f"{k}: {repr(v)}\n{Reset}"
+            res += f"[Gray]└── [?]" if last else f"[Gray]├── [?]"
+            res += f"{k}: {repr(v)}\n[?]"
     return res
 
 class Ast:
@@ -228,11 +200,7 @@ def p_arg_entry(p):
 
 def p_expr_binop(p):
     """
-    expr : expr PLUS expr
-         | expr MINUS expr
-         | expr MULTIPLY expr
-         | expr DIVIDE expr
-         | expr MODULO expr
+    expr : expr op expr
 
     """
     p[0] = Ast('binop', left=p[1], op=p[2], right=p[3])
@@ -471,10 +439,12 @@ def p_access(p):
         target=p[3]
     )
 
+ParserLogger = Logger("Parser")
+
 def p_error(p):
     if p:
-        raise SyntaxError(f"Syntax error '{p.value}' at Line: {p.lexer.lineno}")
+        SyntaxError(ParserLogger, f"Unexpected token '{p.value}'", p.lineno, p.lexpos)
     else:
-        raise SyntaxError("Syntax error at EOF")
-
+        SyntaxError(ParserLogger, f"Unexpected token at EOF")
+    ParserLogger.exit_stage()
 parser = yacc.yacc(debug=False)
