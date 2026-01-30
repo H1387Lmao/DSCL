@@ -19,8 +19,8 @@ const features = [
     },
     {
         title: "Loops (For & While)",
-        description: "Iterate through ranges with `->` or use `while` loops for conditional repetition.",
-        dscl: `for i: 1->100 {\n    print(i)\n}\n\nwhile b != 0 {\n    b = b - 1\n}`,
+        description: "Iterate through ranges with `to` or use `while` loops for conditional repetition.",
+        dscl: `for i: 1 to 100 {\n    print(i)\n}\n\nwhile b != 0 {\n    b = b - 1\n}`,
         python: `for i in range(1, 100):\n    print(i)\n\nwhile b != 0:\n    b -= 1`
     },
     {
