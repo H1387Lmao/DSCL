@@ -1,7 +1,6 @@
 from enum import Enum
 import sys
 import re
-import termios
 
 COLORS = {
     "bold": 1,
