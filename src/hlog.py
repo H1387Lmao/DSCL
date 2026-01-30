@@ -107,6 +107,7 @@ def tokenizer(msg, config):
             elif c in COMMENTS:
                 capture_all="#"
                 cty="comment"
+                ct+=c
             elif c in OPERATIONS:
                 tokens.append((c, "symbol"))
             else:
@@ -126,8 +127,9 @@ def tokenizer(msg, config):
             if cty is None:
                 cty="number"
         else:
-            if c not in IGNORES:
-                ct+=c
+            if not capture_all and c in IGNORES:
+                continue
+            ct+=c
             if not capture_all:
                 if c.isupper() and cty != "identifier":
                     cty="identifier.class"
