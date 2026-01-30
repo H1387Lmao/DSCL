@@ -1,5 +1,5 @@
 fn test(){
-	for i: 1->100{
+	for i: 1 to 100{
 		if i==67{
 			print("SIX SEVENNNN") //kms omfg
 		}elseif i==21{

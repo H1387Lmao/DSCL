@@ -8,10 +8,10 @@ def AstView(node, prefix="", is_last=True, ITEM_NAME=None):
     res = prefix
     name = ITEM_NAME+": " if ITEM_NAME is not None else ""
     if prefix:
-        res += f"[gray]└── [?]" if is_last else f"[Gray]├── [?]"
-    res += f"[cyan]{name}Ast({node.n})[?]\n"
+        res += f"[dark gray]└── [?]" if is_last else f"[dark Gray]├── [?]"
+    res += f"[gold]{name}Ast({node.n})[?]\n"
 
-    child_prefix = prefix + ("    " if is_last else f"[Gray]│   [?]")
+    child_prefix = prefix + ("    " if is_last else f"[dark Gray]│   [?]")
 
     items = [(k, v) for k, v in node.__dict__.items() if k != "n"]
 
@@ -23,20 +23,27 @@ def AstView(node, prefix="", is_last=True, ITEM_NAME=None):
 
         elif isinstance(v, list):
             res += child_prefix
-            res += f"[Gray]└── [?]" if last else f"[Gray]├── [?]"
-            res += f"[Purple]{k} (List) \n[?]"
+            res += f"[dark Gray]└── [?]" if last else f"[dark Gray]├── [?]"
+            res += f"[blue]{k} (List) \n[?]"
 
             for j, item in enumerate(v):
                 res += AstView(
                     item,
-                    child_prefix + ("    " if last else f"[Gray]│   [?]"),
+                    child_prefix + ("    " if last else f"[dark Gray]│   [?]"),
                     j == len(v) - 1,
                 )
 
         else:
             res += child_prefix
-            res += f"[Gray]└── [?]" if last else f"[Gray]├── [?]"
-            res += f"{k}: {repr(v)}\n[?]"
+            res += f"[dark Gray]└── [?]" if last else f"[dark Gray]├── [?]"
+            if isinstance(v, str):
+                color = "[green]"
+            elif isinstance(v, bool):
+                color = "[red]"
+            elif isinstance(v, int):
+                color = "[purple]"
+            else: color=""
+            res += f"{k}: {color}{repr(v)}\n[?]"
     return res
 
 class Ast:
@@ -269,12 +276,12 @@ def p_reassign(p):
 
 def p_getattr(p):
     """
-    getattr : getattr ARROW ID
-            | ID ARROW ID
-            | ID DOT ID
-            | getattr DOT ID
+    getattr : getattr ARROW expr
+            | expr ARROW expr
+            | expr DOT expr
+            | getattr DOT expr
     """
-    if isinstance(p[1], Ast):
+    if isinstance(p[1], Ast) and p[1].n=="getattr":
         p[1]=[p[1].root, p[1].target]
     p[0]=Ast(
         "getattr",
@@ -405,8 +412,7 @@ def p_while(p):
     )
 def p_range_expr(p):
     """
-    expr : expr ARROW expr
-         | expr to expr
+    expr : expr to expr
     """
     p[0]=Ast(
         "range",

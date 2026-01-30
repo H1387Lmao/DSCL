@@ -16,9 +16,9 @@ async def inv(this):
 @fish_bot.slash_command(name='fish')
 async def fish(this, amount_to_fish: int):
   fishes_caught = Table()
-  for fish in range(0, amount_to_fish):
+  for fish in 0.amount_to_fish:
     fishes_caught.append(random.choice(fishes))
-  fishes_text = range("\n", join(fishes_caught))
+  fishes_text = "\n".join(fishes_caught)
   async def lamdba_1(this: Context):
     await fish(this)
   this.respond(view=View(Container(Text("You caught these:"), Text(fishes), Row(Button("Fish Again", callback=lamdba_1)), color=Colors.Green)))

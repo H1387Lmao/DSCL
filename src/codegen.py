@@ -100,7 +100,7 @@ class BaseGenerator:
                 if not isinstance(expr.root, list):
                     expr.root = [expr.root]
                 expr.root.append(expr.target)
-                return '.'.join(expr.root)
+                return '.'.join(map(lambda a: str(self.compile_expr(a)),expr.root))
             case "access":
                 return f"{self.compile_expr(expr.parent)}[{self.compile_expr(expr.target)}]"
             case "call":

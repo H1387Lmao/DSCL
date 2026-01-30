@@ -1,0 +1,29 @@
+filetype: dscl
+
+detect:
+  filename: "\\.dscl$"
+
+rules:
+  # 1. Comments (Should always be first)
+  - comment:
+      start: "//"
+      end: "$"
+
+  # 2. Strings
+  - constant.string:
+      start: "[\"']"
+      end: "[\"']"
+      skip: "\\\\."
+
+  # 3. Keywords & Special Refs (High priority)
+  - statement: "\\b(use|const|mut|cmd|fn|new|async|await|for|if|else|elseif|return|while|in|to)\\b"
+  - special: "\\b(this|\\w+::\\w+|ctx|print)\\b"
+  - identifier: "([a-z_A-Z][a-z0-9_]*)$"
+  - type: "\\b(Number|String|User|Context)\\b"
+
+  # 4. Numbers
+  - constant.number: "\\b[0-9]+(\\.[0-9]+)?\\b"
+
+  - identifier.class: "\\b[A-Z][a-zA-Z0-9_]*\\b"
+
+  - symbol.operator: "(\\.|\\->|>|<|\\+|\\-|\\*|\\/|\\=|\\!|\\%)"

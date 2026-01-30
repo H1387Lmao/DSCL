@@ -1,6 +1,7 @@
 from enum import Enum
 import sys
 import re
+import termios
 
 COLORS = {
     "bold": 1,
@@ -26,12 +27,54 @@ COLORS = {
     "white":39,
 }
 
-def Python(msg):
+Python={
+    "KEYWORDS": [
+        "None", "False", "True", 
+        "async", "def","in", 
+        "for", "elif", "if", 
+        "while", "else", "await", 
+        "from", "import", "self"
+    ],
+    "SPECIALS": [
+        "this", "ctx"
+    ],
+    "TYPES": [
+        "int", "Context", "str", 
+        "User"
+    ],
+    "BUILT_IN_FUNCS":[
+        "print", "respond", "enumerate",
+        "reverse", "len", "input"
+    ],
+    "OPERATIONS": "+-/*%&|<>=!",
+    "SYMBOLS": "(){}[];:,^",
+    "IGNORE": " \t\n",
+    "COMMENTS": "#@",
+    "MEMBER_ACCESS": ".",
+    "FUNCTION_PREFIX": "def"
+}
+
+def tokenizer(msg, config):
     tokens = []
-    KEYWORDS=["None", "False", "True", "async", "def", "in", "for", "elif", "if", "while", "else", "await", "from", "import"]
     ct = ""
     cty = None
     capture_all=False
+    possible_dot=False
+    possible_def=False
+
+    KEYWORDS        = config.get("KEYWORDS", [])
+    SPECIALS        = config.get("SPECIALS", [])
+    TYPES           = config.get("TYPES", [])
+    BUILT_IN_FUNCS  = config.get("BUILT_IN_FUNCS", [])
+    OPERATIONS      = config.get("OPERATIONS", "")
+    SYMBOLS         = config.get("SYMBOLS", "")
+    IGNORES         = config.get("IGNORE", "")
+    COMMENTS        = config.get("COMMENTS", "")
+    MEMBER_ACCESS   = config.get("MEMBER_ACCESS", "")
+    FUNCTION_PREFIX = config.get("FUNCTION_PREFIX", "")
+
+    FULL=OPERATIONS+SYMBOLS+COMMENTS+IGNORES+MEMBER_ACCESS
+
     for c in msg:
         if c == "\n":
             if ct in KEYWORDS:
@@ -40,19 +83,32 @@ def Python(msg):
             ct=""
             cty=None
             capture_all=False
-        if c in "(){}[]+-/*\\%&^=|: \n\t,.@#" and not capture_all:
+        if c in FULL and not capture_all:
             if ct:
                 if ct in KEYWORDS:
                     tokens.append((ct, "keyword"))
+                    if ct == FUNCTION_PREFIX:
+                        possible_def=True
+                elif ct in SPECIALS:
+                    tokens.append((ct, "special"))
+                elif ct in TYPES:
+                    tokens.append((ct, "type"))
                 else:
+                    if c == "(" and (possible_dot or possible_def or ct in BUILT_IN_FUNCS):
+                        cty="function"
+                    possible_dot=False
+                    possible_def=False
                     tokens.append((ct,cty))
                 cty=None
                 ct=""
-            if c in "@#":
+            if c == MEMBER_ACCESS:
+                possible_dot=True
+                tokens.append((c, "symbol"))
+
+            elif c in COMMENTS:
                 capture_all="#"
                 cty="comment"
-                ct+=c
-            elif c in "+-/%*^=&|":
+            elif c in OPERATIONS:
                 tokens.append((c, "symbol"))
             else:
                 tokens.append((c, "ignored"))
@@ -71,10 +127,9 @@ def Python(msg):
             if cty is None:
                 cty="number"
         else:
-            ct+=c
+            if c not in IGNORES:
+                ct+=c
             if not capture_all:
-                if ct in KEYWORDS:
-                    cty="keyword"
                 if c.isupper() and cty != "identifier":
                     cty="identifier.class"
                 elif cty is None:
@@ -83,6 +138,9 @@ def Python(msg):
     if ct:
         if ct in KEYWORDS:
             tokens.append((ct, "keyword"))
+        elif ct in SPECIALS:
+            tokens.append((ct, "special"))
+
         else:
             tokens.append((ct, cty))
     return tokens
@@ -115,22 +173,28 @@ class Logger:
     def print(self, msg):
         print(self.colorize(msg))
 
-    def print_code(self, msg, tokenizer=Python):
+    def print_code(self, msg, config=Python):
         res=""
-        for token in tokenizer(msg):
+        for token in tokenizer(msg, config):
             match(token[1]):
                 case "string":
                     res+="[green]"+token[0]+"[?]"
                 case "symbol":
-                    res+="[bold light cyan]"+token[0]+"[?]"
+                    res+="[red]"+token[0]+"[?]"
                 case "number":
-                    res+="[cyan]"+token[0]+"[?]"
-                case "identifier.class":
-                    res+="[yellow]"+token[0]+"[?]"
-                case "keyword":
                     res+="[purple]"+token[0]+"[?]"
+                case "identifier.class":
+                    res+="[gold]"+token[0]+"[?]"
+                case "keyword":
+                    res+="[red]"+token[0]+"[?]"
                 case "comment":
                     res+="[dark gray]"+token[0]+"[?]"
+                case "function":
+                    res+="[blue]"+token[0]+"[?]"
+                case "special":
+                    res+="[purple]"+token[0]+"[?]"
+                case "type":
+                    res+="[cyan]"+token[0]+"[?]"
                 case _:
                     res+=token[0]
         self.print(res)

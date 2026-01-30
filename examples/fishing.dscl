@@ -43,7 +43,7 @@ cmd fish(Number: amount_to_fish)->fish_bot{
 			)
 		)
 	}
-	const fishes_text = "\n"->join(fishes_caught)
+	const fishes_text = "\n".join(fishes_caught)
 	this->respond(
 		view=View(
 			Container(
