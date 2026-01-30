@@ -9,9 +9,6 @@ import os
 
 MainLogger = Logger("MainLogger")
 
-if os.name=="posix":
-    import readline
-
 def multi_input():
     print("Write 2 empty lines to finish")
     res = ""
