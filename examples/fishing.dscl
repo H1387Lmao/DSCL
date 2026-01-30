@@ -44,17 +44,18 @@ cmd fish(Number: amount_to_fish)->fish_bot{
 		)
 	}
 	const fishes_text = "\n"->join(fishes_caught)
-	const Again = new Button("Fish again")
-	Again->callback=fn(Context: this){
-		await fish(this)
-	}
 	this->respond(
 		view=View(
 			Container(
 				Text("You caught these:"),
 				Text(fishes),
 				Row(
-					Again
+					Button(
+						"Fish Again",
+						callback=async fn(Context: this){
+							await fish(this)
+						}
+					)
 				),
 				color=Colors->Green
 			)

@@ -1,3 +1,4 @@
+
 from .parser import Ast, Red, Reset, Blue, Yellow, Green, Gray, Purple
 import sys
 
@@ -102,7 +103,8 @@ class BaseGenerator:
                 return self.compile_call(expr)
             case "group":
                 p = "Table" if isinstance(expr.target, list) else ""
-                return f"{p}({self.compile_expr(expr.target)})"
+                v = self.compile_expr(expr.target)
+                return f"{p}({v})"
             case "range":
                 left = self.compile_expr(expr.min)
                 right = self.compile_expr(expr.max)
@@ -127,7 +129,7 @@ class BaseGenerator:
 
     def compile_param_type(self, type):
         match type:
-            case "num":
+            case "Number":
                 return ": int"
             case _:
                 return ": "+type
@@ -135,6 +137,7 @@ class BaseGenerator:
     def compile_params(self, args, is_command=False):
         res = "" if not is_command else "this, "
         for arg in args:
+            print(arg)
             res += f"{arg.name}{self.compile_param_type(arg.type)}, "
         return res.removesuffix(", ")
 
@@ -185,7 +188,7 @@ class BaseGenerator:
             case "var_decl":
                 self.decl_var(stmt)
             case "cmd_decl":
-                self._add_line(f"@{stmt.target}.slash_command")
+                self._add_line(f"@{stmt.target}.slash_command(name={repr(stmt.name)})")
                 self.compile_fn(stmt, True)
             case "fn_decl":
                 self.compile_fn(stmt)

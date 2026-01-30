@@ -11,9 +11,14 @@ Purple=Ansi+"94m"
 Reset=Ansi+"0m"
 Gray=Ansi+"90m"
 
-def AstView(node, prefix="", is_last=True, ITEM_NAME=None, no_color=False):
-    if not isinstance(node, Ast):
-        return ""
+def SET_COLOR(no_color):
+    global Yellow
+    global Green
+    global Red
+    global Blue
+    global Purple
+    global Reset
+    global Gray
     Yellow=Ansi+"93m" if not no_color else ""
     Green=Ansi+"92m" if not no_color else ""
     Red=Ansi+"91m" if not no_color else ""
@@ -22,6 +27,11 @@ def AstView(node, prefix="", is_last=True, ITEM_NAME=None, no_color=False):
     Reset=Ansi+"0m" if not no_color else ""
     Gray=Ansi+"90m" if not no_color else ""
 
+
+def AstView(node, prefix="", is_last=True, ITEM_NAME=None, no_color=False):
+    if not isinstance(node, Ast):
+        return ""
+    SET_COLOR(no_color)
     res = prefix
     name = ITEM_NAME+": " if ITEM_NAME is not None else ""
     if prefix:
@@ -103,8 +113,10 @@ def p_func(p):
 def p_lambda(p):
     """
     expr : fn LPAREN params RPAREN scope
+         | async fn LPAREN params RPAREN scope
     """
-    p[0] = Ast('lambda_decl', is_async=False, name=None, args=p[3], stmts=p[5])
+    n=1 if p[1]=="async" else 0
+    p[0] = Ast('lambda_decl', is_async=n==1, name=None, args=p[n+3], stmts=p[n+5])
 
 def p_call(p):
     """

@@ -34,8 +34,8 @@
         </nav>
         <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-[#1e2024] border-b border-blue-500/20 shadow-2xl z-50">
             <div class="flex flex-col p-6 space-y-4">
-                <a href="https://h1387lmao.github.io/DSCL" class="text-gray-300 hover:text-blue-400 transition">Home</a>
-                <a href="https://h1387lmao.github.io/DSCL/features/" class="text-gray-300 hover:text-blue-400 transition">Features</a>
+                <a href="../" class="text-gray-300 hover:text-blue-400 transition">Home</a>
+                <a href="../features" class="text-gray-300 hover:text-blue-400 transition">Features</a>
                 <a href="https://github.com/H1387Lmao/DSCL" class="text-blue-400 font-bold">GitHub</a>
             </div>
         </div>
@@ -186,7 +186,7 @@ try:
     importlib.reload(main)
 
     # Prepare Arguments
-    sys.argv = ["main.py", "compile", "input.dscl", "-o", "output.py"]
+    sys.argv = ["main.py", "compile", "input.dscl", "-o", "output.py", "-no-col"]
     
     # Execute Compiler
     try:

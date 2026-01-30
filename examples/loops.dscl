@@ -22,7 +22,10 @@ while b!=0{
 
 // test lambda
 
-mut a = fn (){
+mut a = fn(){
+	mut table=[50,70]
+	table.append(50)
+	print(table)
 }
 
 test()
