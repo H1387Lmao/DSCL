@@ -43,5 +43,4 @@ python main.py examples/hello.dscl -compiler=Pycord
 |:-------------------------:|:----------:|
 |Transpiler for Pycord      |Yes         |
 |Components V2 Integration  |No          |
-|Custom Pycord Wrapper      |No          |
-|Better syntax (hopefully)  |Probably?   |
+|Custom Pycord Wrapper      |W.I.P       |
