@@ -8,190 +8,90 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
     <style>
         html { scroll-behavior: smooth; }
-        .feature-card { transition: all 0.3s ease; }
-        .feature-card:hover { border-color: #3b82f6; transform: translateY(-2px); }
-
-        /* Smooth stacking for zero-flicker transitions */
-        .code-container { 
-            position: relative; 
-            overflow-y: hidden; 
-            display: grid;
-            grid-template-columns: 1fr;
-            grid-template-rows: 1fr;
-            background: #1e2024;
-        }
-
-        .code-view { 
-            grid-area: 1 / 1 / 2 / 2;
-            width: 100%;
-            opacity: 1;
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-out;
-            z-index: 1;
-        }
-
-        .hidden-view { 
-            opacity: 0 !important; 
-            pointer-events: none;
-            transform: translateY(5px);
-            z-index: 0;
-        }
-
-        /* Nav Dropdown Animation */
+        .code-container { display: grid; grid-template-columns: 1fr; background: #0d0e10; }
+        .code-view { grid-area: 1 / 1; transition: opacity 0.2s; }
+        .hidden-view { opacity: 0; pointer-events: none; }
         #mobile-menu:not(.hidden) { animation: slideDown 0.2s ease-out; }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        pre code { display: block; height: 100%; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="bg-[#1a1c1e] text-gray-200 font-sans leading-relaxed">
+<body class="bg-[#1a1c1e] text-gray-200 font-sans">
 
     <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">
         <nav class="flex justify-between items-center px-8 py-6 max-w-6xl mx-auto">
             <h1 class="text-2xl font-bold tracking-tighter text-white">
-                DSCL<span class="text-blue-500">_</span><span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">FEATURES</span>
+                DSCL<span class="text-blue-500">_</span><span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">v1.54</span>
             </h1>
-            <button id="menu-toggle" class="text-white focus:outline-none">
-                <svg id="menu-icon" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                </svg>
-            </button>
-        </nav>
-
-        <div id="mobile-menu" class="hidden absolute overflow-y-auto top-full left-0 w-full bg-[#1e2024] border-b border-blue-500/20 shadow-2xl z-50">
-            <div class="flex flex-col p-6 space-y-6">
-                <div class="flex flex-col space-y-3">
-                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Menu</span>
-                    <a href="../" class="text-lg font-medium hover:text-blue-400 transition">Home</a>
-                    <a href="../play" class="text-lg font-medium hover:text-emerald-400 transition">Playground</a>
-                    <a href="https://github.com/H1387Lmao/DSCL" class="text-lg font-medium text-blue-400 hover:text-red-300 transition">GitHub</a>
-                </div>
-                <hr class="border-gray-800">
-                <div class="flex flex-col space-y-3">
-                    <span class="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">Jump to Feature</span>
-                    <div id="nav-links-container" class="flex flex-col space-y-2"></div>
-                </div>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="../index.html" class="text-sm font-medium hover:text-blue-400 transition">Home</a>
+                <a href="#" class="text-sm font-medium text-emerald-400">Features</a>
+                <a href="../play" class="text-sm font-medium hover:text-yellow-400 transition">Playground</a>
+                <a href="https://github.com/H1387Lmao/DSCL" class="text-sm font-bold border border-gray-700 px-3 py-1 rounded-md">GitHub</a>
             </div>
+            <button id="menu-toggle" class="md:hidden text-white"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></button>
+        </nav>
+        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-[#1e2024] p-6 space-y-4 border-b border-gray-800">
+            <a href="../index.html" class="block text-gray-300">Home</a>
+            <a href="#" class="block text-emerald-400 font-bold">Features</a>
+            <a href="../play" class="block text-gray-300">Playground</a>
         </div>
     </header>
 
     <main class="max-w-6xl mx-auto px-8 py-16">
-        <div class="mb-16 text-center md:text-left">
-            <h2 class="text-4xl md:text-5xl font-extrabold text-white mb-4 italic">Language <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Features</span></h2>
-            <p class="text-gray-400 text-lg max-w-2xl">
-                Explore what <span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">DSCL</span> has to offer.
-            </p>
-        </div>
-        <div id="features-container" class="space-y-20"></div>
+        <h2 class="text-4xl font-extrabold text-white mb-12">Language <span class="text-blue-400">Features</span></h2>
+        <div id="features-container" class="space-y-4"></div>
     </main>
 
-    <footer class="text-center py-10 text-gray-600 text-sm border-t border-gray-800 mt-20">
-        &copy; 2026 DSCL Project. Built for the Discord Developer community. By H1387Lmao♥
-    </footer>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="https://h1387lmao.github.io/DSCL/features/features.js"></script>
+    <script src="features.js"></script>
     <script>
         const container = document.getElementById('features-container');
-        const navContainer = document.getElementById('nav-links-container');
-
         features.forEach((feature, index) => {
-            const regex = /`([^`]+)`/g;
-            const styledDescription = feature.description.replace(regex, '<span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-yellow-400 font-mono font-bold">$1</span>');
-            const sectionId = feature.title.toLowerCase().replace(/\s+/g, '-');
-
-            const navLink = document.createElement('a');
-            navLink.href = `#${sectionId}`;
-            navLink.className = "nav-link text-gray-400 hover:text-white transition text-sm py-1";
-            navLink.textContent = feature.title;
-            navContainer.appendChild(navLink);
-
-            const card = document.createElement('section');
-            card.id = sectionId;
-            card.className = "feature-card grid md:grid-cols-2 gap-8 items-stretch bg-[#24262b] p-8 rounded-2xl border border-gray-700 shadow-2xl scroll-mt-32";
-
-            card.innerHTML = `
-                <div class="space-y-4">
-                    <h3 class="text-2xl font-bold text-white tracking-tight">${feature.title}</h3>
-                    <p class="text-gray-400 leading-relaxed">${styledDescription}</p>
+            const section = document.createElement('div');
+            section.className = "grid md:grid-cols-2 gap-8 py-12 border-b border-gray-800 last:border-0";
+            section.innerHTML = `
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-4">${feature.title}</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed">${feature.description}</p>
                 </div>
-                <div class="rounded-xl overflow-hidden border border-gray-800 bg-[#1e2024] flex flex-col relative group">
-                    <div class="flex items-center justify-between px-4 py-2 border-b border-gray-800 bg-[#1a1c1e]/50">
-                        <div class="flex space-x-1.5">
-                            <div class="w-2.5 h-2.5 rounded-full bg-red-500/20 border border-red-500/40"></div>
-                            <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/40"></div>
-                            <div class="w-2.5 h-2.5 rounded-full bg-green-500/20 border border-green-500/40"></div>
+                <div class="rounded-lg overflow-hidden border border-gray-800 bg-[#0d0e10]">
+                    <div class="flex items-center justify-between px-4 py-2 bg-[#1e2024] border-b border-gray-800">
+                        <div class="flex space-x-2">
+                            <button onclick="toggleCode(${index}, 'dscl')" id="btn-dscl-${index}" class="text-[10px] font-bold px-2 py-1 rounded bg-blue-600 text-white">DSCL</button>
+                            <button onclick="toggleCode(${index}, 'py')" id="btn-py-${index}" class="text-[10px] font-bold px-2 py-1 rounded text-gray-500">PYTHON</button>
                         </div>
-                        <div class="flex bg-black/40 p-1 rounded-md">
-                            <button onclick="toggleCode(${index}, 'dscl')" id="btn-dscl-${index}" class="px-3 py-1 text-[10px] font-bold rounded transition bg-blue-600 text-white">DSCL</button>
-                            <button onclick="toggleCode(${index}, 'py')" id="btn-py-${index}" class="px-3 py-1 text-[10px] font-bold rounded transition text-gray-500 hover:text-white">PYTHON</button>
-                        </div>
+                        <button onclick="copyCode(${index})" class="text-gray-500 hover:text-white transition">
+                            <svg id="copy-${index}" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
+                        </button>
                     </div>
-                    
-                    <button onclick="copyCurrentCode(${index})" class="absolute right-4 bottom-4 p-2 bg-gray-800/80 hover:bg-blue-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all z-20 border border-gray-700">
-                        <svg id="copy-icon-${index}" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
-                        </svg>
-                    </button>
-
-                    <div class="code-container flex-grow h-full">
-                        <pre id="dscl-${index}" class="code-view m-0"><code class="language-rust p-6 block">${feature.dscl}</code></pre>
-                        <pre id="py-${index}" class="code-view hidden-view m-0"><code class="language-python p-6 block">${feature.python}</code></pre>
+                    <div class="code-container">
+                        <pre id="dscl-${index}" class="code-view m-0"><code class="language-rust p-6 block text-xs">${feature.dscl}</code></pre>
+                        <pre id="py-${index}" class="code-view hidden-view m-0"><code class="language-python p-6 block text-xs">${feature.python}</code></pre>
                     </div>
                 </div>`;
-            container.appendChild(card);
+            container.appendChild(section);
         });
 
-        // Toggle Logic with no flicker
-        window.toggleCode = (index, type) => {
-            const dsclEl = document.getElementById(`dscl-${index}`);
-            const pyEl = document.getElementById(`py-${index}`);
-            const dsclBtn = document.getElementById(`btn-dscl-${index}`);
-            const pyBtn = document.getElementById(`btn-py-${index}`);
-
-            if (type === 'dscl') {
-                dsclEl.classList.remove('hidden-view');
-                pyEl.classList.add('hidden-view');
-                dsclBtn.className = "px-3 py-1 text-[10px] font-bold rounded transition bg-blue-600 text-white";
-                pyBtn.className = "px-3 py-1 text-[10px] font-bold rounded transition text-gray-400 hover:text-white";
+        window.toggleCode = (i, type) => {
+            const dscl = document.getElementById(`dscl-${i}`), py = document.getElementById(`py-${i}`);
+            const bD = document.getElementById(`btn-dscl-${i}`), bP = document.getElementById(`btn-py-${i}`);
+            if(type === 'dscl') { 
+                dscl.classList.remove('hidden-view'); py.classList.add('hidden-view');
+                bD.className = "text-[10px] font-bold px-2 py-1 rounded bg-blue-600 text-white";
+                bP.className = "text-[10px] font-bold px-2 py-1 rounded text-gray-500";
             } else {
-                pyEl.classList.remove('hidden-view');
-                dsclEl.classList.add('hidden-view');
-                pyBtn.className = "px-3 py-1 text-[10px] font-bold rounded transition bg-emerald-500 text-black";
-                dsclBtn.className = "px-3 py-1 text-[10px] font-bold rounded transition text-gray-400 hover:text-white";
+                py.classList.remove('hidden-view'); dscl.classList.add('hidden-view');
+                bP.className = "text-[10px] font-bold px-2 py-1 rounded bg-emerald-500 text-black";
+                bD.className = "text-[10px] font-bold px-2 py-1 rounded text-gray-500";
             }
         };
 
-        // Copy Logic
-        window.copyCurrentCode = (index) => {
-            const dsclEl = document.getElementById(`dscl-${index}`);
-            const pyEl = document.getElementById(`py-${index}`);
-            const icon = document.getElementById(`copy-icon-${index}`);
-            
-            const activeCode = dsclEl.classList.contains('hidden-view') ? pyEl : dsclEl;
-            const text = activeCode.textContent;
-
-            navigator.clipboard.writeText(text).then(() => {
-                // Success animation
-                const originalIcon = icon.innerHTML;
-                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
-                setTimeout(() => icon.innerHTML = originalIcon, 2000);
-            });
+        window.copyCode = (i) => {
+            const active = document.getElementById(`dscl-${i}`).classList.contains('hidden-view') ? `py-${i}` : `dscl-${i}`;
+            navigator.clipboard.writeText(document.getElementById(active).textContent);
         };
 
-        const menuToggle = document.getElementById('menu-toggle');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const menuIcon = document.getElementById('menu-icon');
-
-        menuToggle.addEventListener('click', () => {
-            const isHidden = mobileMenu.classList.toggle('hidden');
-            menuIcon.innerHTML = isHidden
-                ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>'
-                : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
-        });
-
+        document.getElementById('menu-toggle').onclick = () => document.getElementById('mobile-menu').classList.toggle('hidden');
         hljs.highlightAll();
     </script>
 </body>

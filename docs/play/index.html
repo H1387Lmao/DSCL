@@ -3,20 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Playground | DSCL</title>
+    <title>DSCL v1.54 | Compiler Shell</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/ansi_up@5.1.0/ansi_up.min.js"></script>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    
+    <!-- Monaco Editor -->
+    <link rel="stylesheet" data-name="vs/editor/editor.main" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css">
+    
     <style>
         html { scroll-behavior: smooth; }
-        #mobile-menu:not(.hidden) { animation: slideDown 0.2s ease-out; }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        .editor-container {
+            height: 384px;
+            border: 1px solid #30363d;
+            border-radius: 0.5rem;
+            overflow: hidden;
         }
-        .editor-container { height: 450px; border: 1px solid #334155; border-radius: 0.75rem; overflow: hidden; }
-        #console-output::-webkit-scrollbar { width: 6px; }
-        #console-output::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+        .output-container {
+            height: 384px;
+            border: 1px solid #30363d;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .box { 
+            overflow: auto;
+            font-size: 12px;
+            font-family: monospace;
+        }
+
+        #console { 
+            white-space: pre-wrap; 
+            word-break: break-all; 
+        }
+
+        /* Terminal cursor */
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: #00ff00;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        /* AST Visuals */
+        .ast-node { 
+            margin-left: 15px; 
+            border-left: 1px solid #30363d; 
+            padding-left: 10px; 
+            margin-top: 4px; 
+        }
+        .ast-n { 
+            color: #ff7b72; 
+            font-weight: bold; 
+        }
+        .ast-k { 
+            color: #79c0ff; 
+        }
+        .ast-v { 
+            color: #a5d6ff; 
+        }
+
+        #mobile-menu:not(.hidden) { 
+            animation: slideDown 0.2s ease-out; 
+        }
+        
+        @keyframes slideDown { 
+            from { 
+                opacity: 0; 
+                transform: translateY(-10px); 
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            } 
+        }
+
+        /* Cool loading animation */
+        .loader-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .loader {
+            display: inline-flex;
+            gap: 4px;
+        }
+
+        .loader-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #3b82f6;
+            animation: dotPulse 1.4s infinite ease-in-out;
+        }
+
+        .loader-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loader-dot:nth-child(2) { animation-delay: -0.16s; }
+        .loader-dot:nth-child(3) { animation-delay: 0s; }
+
+        @keyframes dotPulse {
+            0%, 80%, 100% { 
+                transform: scale(0.6);
+                opacity: 0.4;
+            }
+            40% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-loading {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+        }
+
+        .status-ready {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+        }
+
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-loading .status-dot {
+            background: #60a5fa;
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .status-ready .status-dot {
+            background: #4ade80;
+        }
+
+        .status-error .status-dot {
+            background: #f87171;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body class="bg-[#1a1c1e] text-gray-200 font-sans">
@@ -24,220 +180,331 @@
     <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">
         <nav class="flex justify-between items-center px-8 py-6 max-w-6xl mx-auto">
             <h1 class="text-2xl font-bold tracking-tighter text-white">
-                DSCL<span class="text-blue-500">_</span><span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">PLAYGROUND</span>
+                DSCL<span class="text-blue-500">_</span><span class="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">v1.54</span>
             </h1>
-            <button id="menu-toggle" class="text-white focus:outline-none">
-                <svg id="menu-icon" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="../index.html" class="text-sm font-medium hover:text-blue-400 transition">Home</a>
+                <a href="../features" class="text-sm font-medium hover:text-emerald-400 transition">Features</a>
+                <a href="#" class="text-sm font-medium text-yellow-400">Playground</a>
+                <a href="https://github.com/H1387Lmao/DSCL" class="text-sm font-bold border border-gray-700 px-3 py-1 rounded-md">GitHub</a>
+            </div>
+            <button id="menu-toggle" class="md:hidden text-white">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
                 </svg>
             </button>
         </nav>
-        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-[#1e2024] border-b border-blue-500/20 shadow-2xl z-50">
-            <div class="flex flex-col p-6 space-y-4">
-                <a href="../" class="text-gray-300 hover:text-blue-400 transition">Home</a>
-                <a href="../features" class="text-gray-300 hover:text-blue-400 transition">Features</a>
-                <a href="https://github.com/H1387Lmao/DSCL" class="text-blue-400 font-bold">GitHub</a>
-            </div>
+        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-[#1e2024] p-6 space-y-4 border-b border-gray-800">
+            <a href="../index.html" class="block text-gray-300">Home</a>
+            <a href="../features" class="block text-gray-300">Features</a>
+            <a href="#" class="block text-yellow-400 font-bold">Playground</a>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6 py-12">
-        <div id="status-card" class="mb-8 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div id="status-dot" class="w-3 h-3 rounded-full bg-yellow-500 animate-pulse"></div>
-                <span id="status-text" class="text-sm font-medium text-blue-100">Loading Pyodide & PLY...</span>
-            </div>
-            <div id="spinner" class="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+    <main class="max-w-6xl mx-auto px-8 py-16">
+        <div class="mb-8">
+            <h2 class="text-4xl font-extrabold text-white mb-4">Compiler <span class="text-blue-400">Playground</span></h2>
+            <div id="status-container"></div>
         </div>
 
-        <div class="grid lg:grid-cols-2 gap-8">
-            <div class="space-y-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest">DSCL Source</h3>
-                    <button id="run-btn" disabled class="px-6 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-800 disabled:text-gray-500 text-white text-xs font-bold rounded-lg transition-all transform active:scale-95 shadow-lg shadow-blue-500/20">
-                        COMPILE
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+            <div>
+                <div class="text-xs font-bold text-gray-400 mb-2">DSCL SOURCE CODE</div>
+                <div id="editor" class="editor-container"></div>
+            </div>
+	        <button 
+    	        id="run-btn" 
+        	    disabled 
+				class="bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold py-3 px-8 rounded-lg transition cursor-pointer disabled:cursor-wait mb-8"
+        	>
+        		COMPILE
+        	</button>
+
+
+            <div>
+                <div class="text-xs font-bold text-gray-400 mb-2">PYTHON OUTPUT</div>
+                <div id="output" class="output-container"></div>
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="text-xs font-bold text-gray-400">HLOG TERMINAL</div>
+                    <button 
+                        id="clear-terminal" 
+                        class="text-xs text-gray-500 hover:text-gray-300 transition"
+                        title="Clear terminal"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
                     </button>
                 </div>
-                <div id="input-editor" class="editor-container"></div>
+                <div id="console" class="box h-80 bg-[#0d0e10] border border-gray-800 p-4 rounded-lg">
+                </div>
             </div>
-
-            <div class="space-y-4">
-                <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest">Transpiled Python</h3>
-                <div id="output-editor" class="editor-container"></div>
-            </div>
-        </div>
-
-        <div class="mt-8 space-y-4">
-            <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest">Compiler Logs & AST</h3>
-            <div id="console-output" class="bg-[#0d0e10] p-6 rounded-xl font-mono text-sm border border-gray-800 h-48 overflow-y-auto shadow-inner">
-               <div id="console-inner" class="bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
-                  Initializing compiler system...
-               </div>
+            <div>
+                <div class="text-xs font-bold text-gray-400 mb-2">AST INSPECTOR</div>
+                <div id="ast-tree" class="box h-80 bg-[#0d0e10] border border-gray-800 p-4 rounded-lg"></div>
             </div>
         </div>
     </main>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
-<script>
-    let pyodide;
-    let inputEditor, outputEditor;
-    const REPO_RAW = "https://raw.githubusercontent.com/H1387Lmao/DSCL/master/";
-    const DEPENDENCIES = ['main.py', 'src/lexer.py', 'src/parser.py', 'src/codegen.py', 'src/hlog.py', 'src/errors.py'];
 
-    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
-    require(['vs/editor/editor.main'], function () {
-        inputEditor = monaco.editor.create(document.getElementById('input-editor'), {
-            value: 'use pkg::discord\n\nconst bot = new Bot("!", new Intents(message_content=True))\n\ncmd ping() -> bot {\n    this->respond("Pong!")\n}\n\nbot->run("TOKEN")',
-            language: 'rust',
-            theme: 'vs-dark',
-            automaticLayout: true,
-            fontSize: 14,
-            padding: { top: 20 }
-        });
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <script>
+        const ansi = new AnsiUp();
+        const consoleBox = document.getElementById('console');
+        const astBox = document.getElementById('ast-tree');
+        const runBtn = document.getElementById('run-btn');
+        const statusContainer = document.getElementById('status-container');
 
-        outputEditor = monaco.editor.create(document.getElementById('output-editor'), {
-            value: '',
-            language: 'python',
-            theme: 'vs-dark',
-            readOnly: true,
-            automaticLayout: true,
-            fontSize: 14,
-            padding: { top: 20 }
-        });
-    });
+        let editorInstance;
+        let outputInstance;
 
-    async function init() {
-        try {
-            pyodide = await loadPyodide();
-            await pyodide.loadPackage("micropip");
-            const micropip = pyodide.pyimport("micropip");
+        // Status management
+        function setStatus(type, message) {
+            const statusClasses = {
+                loading: 'status-loading',
+                ready: 'status-ready',
+                error: 'status-error'
+            };
+
+            const html = type === 'loading' 
+                ? `<div class="status-badge ${statusClasses[type]}">
+                     <div class="loader">
+                       <div class="loader-dot"></div>
+                       <div class="loader-dot"></div>
+                       <div class="loader-dot"></div>
+                     </div>
+                     <span>${message}</span>
+                   </div>`
+                : `<div class="status-badge ${statusClasses[type]}">
+                     <div class="status-dot"></div>
+                     <span>${message}</span>
+                   </div>`;
             
-            updateStatus("Installing PLY...", "yellow");
-            await micropip.install("ply");
+            statusContainer.innerHTML = html;
+        }
 
-            updateStatus("Fetching Repository Files...", "yellow");
-            for (const file of DEPENDENCIES) {
-                const resp = await fetch(REPO_RAW + file);
-                if (!resp.ok) throw new Error(`Failed to fetch ${file}`);
-                const text = await resp.text();
-                if (file.includes('/')) {
-                    const parts = file.split('/');
-                    let currentPath = '';
-                    for (let i = 0; i < parts.length - 1; i++) {
-                        currentPath += (currentPath ? '/' : '') + parts[i];
-                        try { 
-                            pyodide.FS.mkdir(currentPath); 
-                            logToConsole("Made directory: "+currentPath)
-                        } catch (e) {}
-                    }
-                }
-                logToConsole(file+" Downloaded")
-                pyodide.FS.writeFile(file, text);
+        // Terminal functions
+        function appendToTerminal(text, color = '#c9d1d9') {
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const line = document.createElement('div');
+            line.style.color = color;
+            line.innerHTML = `<span style="color: #6b7280;">[${timestamp}]</span> ${ansi.ansi_to_html(text)}`;
+            consoleBox.appendChild(line);
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        function clearTerminal() {
+            consoleBox.innerHTML = ``;
+        }
+
+        document.getElementById('clear-terminal').onclick = clearTerminal;
+
+        // Configure Monaco
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+
+        require(['vs/editor/editor.main'], function () {
+            // Create DSCL editor
+            editorInstance = monaco.editor.create(document.getElementById('editor'), {
+                value: `use pkg::discord
+const bot = new Bot("!", new Intents(message_content=True))
+
+cmd hello() -> bot {
+    this->respond("World!")
+}
+bot->run("TOKEN")`,
+                language: 'rust',
+                theme: 'vs-dark',
+                minimap: { enabled: false },
+                fontSize: 14,
+                lineNumbers: 'on',
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                tabSize: 4,
+                renderWhitespace: 'selection',
+                fontFamily: 'Consolas, Monaco, Courier New, monospace'
+            });
+
+            // Create Python output editor
+            outputInstance = monaco.editor.create(document.getElementById('output'), {
+                value: '',
+                language: 'python',
+                theme: 'vs-dark',
+                minimap: { enabled: false },
+                fontSize: 14,
+                lineNumbers: 'on',
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                readOnly: true,
+                tabSize: 4,
+                fontFamily: 'Consolas, Monaco, Courier New, monospace'
+            });
+        });
+
+        // Recursive AST UI Builder
+        function buildAST(node, parent) {
+            if (!node || typeof node !== 'object') return;
+            const container = document.createElement('div');
+            container.className = "ast-node";
+
+            if (node.n) {
+                const head = document.createElement('div');
+                head.className = "ast-n";
+                head.textContent = `[${node.n}]`;
+                container.appendChild(head);
             }
 
-            updateStatus("Ready to Compile", "emerald");
-            document.getElementById('spinner').style.display = 'none';
-            document.getElementById('run-btn').disabled = false;
-            logToConsole("System initialized.");
-        } catch (err) {
-            updateStatus("Load Error", "red");
-            logToConsole("Error during initialization: " + err.message);
+            for (let k in node) {
+                if (k === 'n') continue;
+                const v = node[k];
+                const row = document.createElement('div');
+                if (Array.isArray(v)) {
+                    row.innerHTML = `<span class="ast-k">${k}:</span> List(${v.length})`;
+                    container.appendChild(row);
+                    v.forEach(child => buildAST(child, container));
+                } else if (v && typeof v === 'object') {
+                    row.innerHTML = `<span class="ast-k">${k}:</span>`;
+                    container.appendChild(row);
+                    buildAST(v, container);
+                } else {
+                    row.innerHTML = `<span class="ast-k">${k}:</span> <span class="ast-v">${JSON.stringify(v)}</span>`;
+                    container.appendChild(row);
+                }
+            }
+            parent.appendChild(container);
         }
-    }
 
-    function updateStatus(text, color) {
-        document.getElementById('status-text').innerText = text;
-        const dot = document.getElementById('status-dot');
-        dot.className = `w-3 h-3 rounded-full bg-${color}-500 animate-pulse`;
-    }
+        let py;
+        async function init() {
+            setStatus('loading', 'Initializing Pyodide runtime...');
+            appendToTerminal('Initializing compiler environment...', '#60a5fa');
+            
+            try {
+                py = await loadPyodide();
+                appendToTerminal('Pyodide loaded', '#4ade80');
+                
+                setStatus('loading', 'Installing dependencies...');
+                await py.loadPackage("micropip");
+                const mp = py.pyimport("micropip");
+                await mp.install("ply");
+                appendToTerminal('Dependencies installed', '#4ade80');
 
-    function logToConsole(msg) {
-        const consoleBox = document.getElementById('console-output');
-        consoleBox.innerText += `\n> ${msg}`;
-        consoleBox.scrollTop = consoleBox.scrollHeight;
-    }
+                setStatus('loading', 'Loading DSCL compiler modules...');
+                // Setup DSCL Filesystem
+                const files = ['src/lexer.py', 'src/parser.py', 'src/codegen.py', 'src/hlog.py', 'src/errors.py'];
+                for (const f of files) {
+                    const res = await fetch(`https://raw.githubusercontent.com/H1387Lmao/DSCL/master/${f}`);
+                    const text = await res.text();
+                    if (f.includes('/')) try { py.FS.mkdir('src'); } catch(e){}
+                    py.FS.writeFile(f, text);
+                    appendToTerminal(`Loaded ${f}`, '#4ade80');
+                }
+                
+                setStatus('ready', 'Ready!');
+                appendToTerminal('Compiler ready!', '#4ade80');
+                runBtn.disabled = false;
+            } catch (err) {
+                setStatus('error', 'Initialization failed');
+                appendToTerminal(`Error: ${err.message}`, '#f87171');
+            }
+        }
 
-    document.getElementById('run-btn').onclick = async () => {
-        const code = inputEditor.getValue();
-        // Clear previous output file to avoid reading old results
-        try { pyodide.FS.unlink('output.py'); } catch(e) {}
-        
-        pyodide.FS.writeFile('input.dscl', code);
-        logToConsole("Compiling to python...");
+        runBtn.onclick = async () => {
+            appendToTerminal('Starting compilation...', '#60a5fa');
+            astBox.innerHTML = "";
+            
+            const editorValue = editorInstance.getValue();
+            
+            const mainScript = `
+import sys, os, io, importlib, traceback
+from pyodide.ffi import to_js
+from js import Object
 
-        try {
-            const pyResult = await pyodide.runPythonAsync(`
-import sys
-import os
-import io
-import importlib
+# Ensure local paths
+for path in [os.getcwd(), os.path.join(os.getcwd(), "src")]:
+    if path not in sys.path: sys.path.append(path)
 
-# 1. Setup Environment
-if os.getcwd() not in sys.path:
-    sys.path.append(os.getcwd())
-if os.path.join(os.getcwd(), "src") not in sys.path:
-    sys.path.append(os.path.join(os.getcwd(), "src"))
+# Buffer for stdout/stderr (Captures hlog output)
+buf = io.StringIO()
+old_out, old_err = sys.stdout, sys.stderr
+sys.stdout, sys.stderr = buf, buf
 
-output_capture = io.StringIO()
-sys.stdout = output_capture
-sys.stderr = output_capture
-
-compiled_text = ""
-logs = ""
+final_py = ""
+tree_data = None
 
 try:
-    import main
-    importlib.reload(main)
+    # Import/Reload modules to bind to the new sys.stdout
+    import src.hlog as hlog
+    import src.parser as p
+    import src.codegen as c
+    importlib.reload(hlog)
+    importlib.reload(p)
+    importlib.reload(c)
 
-    # Prepare Arguments
-    sys.argv = ["main.py", "compile", "input.dscl", "-o", "output.py", "-nc"]
+    # Sanitize user input for Python string
+    src_input = """${editorValue.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"""
     
-    # Execute Compiler
     try:
-        main.main()
+        ast_obj = p.parser.parse(src_input)
+        if ast_obj:
+            final_py = c.BaseGenerator(ast_obj).compile()
+            
+            def serialize(o):
+                if hasattr(o, "__dict__"):
+                    d = {k: serialize(v) for k, v in o.__dict__.items() if not k.startswith('_')}
+                    if hasattr(o, 'n'): d['n'] = o.n
+                    return d
+                return [serialize(x) for x in o] if isinstance(o, list) else o
+            tree_data = to_js(serialize(ast_obj), dict_converter=Object.fromEntries)
+        else:
+            final_py = "# Parse Failed: Check Console."
     except SystemExit:
-        pass # Argparse often calls sys.exit()
+        final_py = "# Process exited via sys.exit()"
+    except Exception:
+        final_py = traceback.format_exc()
 
-    # Retrieve Result
-    if os.path.exists("output.py"):
-        with open("output.py", "r") as f:
-            compiled_text = f.read()
-    else:
-        compiled_text = "# Error: Output file was not generated."
-    
-    logs = output_capture.getvalue()
-except Exception as e:
-    compiled_text = f"# Compiler Crash:\\n{str(e)}"
-    logs = str(e)
+except Exception:
+    final_py = traceback.format_exc()
 
-# Ensure this is the last expression so JS receives it
-[compiled_text, logs]
-            `);
+finally:
+    # Always restore original streams
+    sys.stdout, sys.stderr = old_out, old_err
 
-            // 2. Safely extract results from the PyProxy
-            if (pyResult && typeof pyResult.get === 'function') {
-                const outCode = pyResult.get(0);
-                const outLogs = pyResult.get(1);
+[final_py, buf.getvalue(), tree_data]
+`;
+            try {
+                const [pyCode, pyLogs, pyAst] = await py.runPythonAsync(mainScript);
                 
-                outputEditor.setValue(outCode);
-                logToConsole(outLogs || "Transpilation complete.");
+                outputInstance.setValue(pyCode);
                 
-                // Clean up the proxy to prevent memory leaks
-                pyResult.destroy();
-            } else {
-                logToConsole("Runtime Error: Python returned unexpected data type.");
+                // Append logs to terminal
+                if (pyLogs.trim()) {
+                    const logLines = pyLogs.split('\n');
+                    logLines.forEach(line => {
+                        if (line.trim()) appendToTerminal(line);
+                    });
+                }
+                
+                if (pyAst) {
+                    buildAST(pyAst, astBox);
+                    appendToTerminal('Compilation successful', '#4ade80');
+                } else {
+                    astBox.innerHTML = "<div style='color:#8b949e'>AST empty or compilation failed.</div>";
+                    appendToTerminal('Compilation failed', '#f87171');
+                }
+                
+            } catch (err) {
+                outputInstance.setValue("ERROR: " + err.message);
+                appendToTerminal(`Error: ${err.message}`, '#f87171');
             }
+        };
 
-        } catch (err) {
-            logToConsole("JS Bridge Error: " + err.message);
-            console.error(err);
-        }
-    };
-
-    document.getElementById('menu-toggle').onclick = () => {
-        document.getElementById('mobile-menu').classList.toggle('hidden');
-    };
-
-    init();
-</script>
+        document.getElementById('menu-toggle').onclick = () => document.getElementById('mobile-menu').classList.toggle('hidden');
+        
+        init();
+    </script>
 </body>
 </html>
