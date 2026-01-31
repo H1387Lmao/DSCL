@@ -16,11 +16,13 @@
         }
         .code-view { 
             grid-area: 1 / 1; 
-            transition: opacity 0.2s;
+            transition: opacity 0.5s;
+            background: #1a1b26;
             min-height: 100%;
         }
         .code-view pre {
             height: 100%;
+            background: #1a1b26;
         }
         .hidden-view { opacity: 0; pointer-events: none; }
         #mobile-menu:not(.hidden) { animation: slideDown 0.2s ease-out; }
@@ -84,6 +86,10 @@
         .feature-menu-link.active {
             background: rgba(59, 130, 246, 0.1);
             border-left: 3px solid #3b82f6;
+        }
+
+        [id^="feature-"] {
+            scroll-margin-top: 96px; /* header height */
         }
         
         /* Syntax highlighting for descriptions - matching tokyo-night-dark theme */
@@ -152,7 +158,7 @@
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="features.js"></script>
+    <script src="https://h1387lmao.github.io/DSCL/features/features.js"></script>
     <script>
         const container = document.getElementById('features-container');
         const featuresMenu = document.getElementById('features-menu');
@@ -248,14 +254,29 @@
                 return `<code class="text-xs px-1.5 py-0.5 rounded bg-gray-800">${html}</code>`;
             });
         }
-
+		function normalizeCodeLines(dscl, py) {
+		    const dsclLines = dscl.trimEnd().split('\n');
+		    const pyLines   = py.trimEnd().split('\n');
+		
+		    const maxLines = Math.max(dsclLines.length, pyLines.length);
+		
+		    while (dsclLines.length < maxLines) dsclLines.push('');
+		    while (pyLines.length < maxLines) pyLines.push('');
+		
+		    return {
+		        dscl: dsclLines.join('\n'),
+		        py: pyLines.join('\n')
+		    };
+		}
+		
         // Build features sections and menu
         features.forEach((feature, index) => {
             // Create feature section
             const section = document.createElement('div');
             section.id = `feature-${index}`;
             section.className = "grid md:grid-cols-2 gap-8 py-12 border-b border-gray-800 last:border-0";
-            
+
+            const normalized = normalizeCodeLines(feature.dscl, feature.python);
             const highlightedDesc = highlightDescription(feature.description);
             
             section.innerHTML = `
@@ -274,8 +295,8 @@
                         </button>
                     </div>
                     <div class="code-container" id="code-container-${index}">
-                        <div id="dscl-${index}" class="code-view"><pre class="m-0 h-full"><code class="language-rust p-6 block text-xs">${feature.dscl}</code></pre></div>
-                        <div id="py-${index}" class="code-view hidden-view"><pre class="m-0 h-full"><code class="language-python p-6 block text-xs">${feature.python}</code></pre></div>
+                        <div id="dscl-${index}" class="code-view"><pre class="m-0 h-full"><code class="language-rust p-6 block text-xs">${normalized.dscl}</code></pre></div>
+                        <div id="py-${index}" class="code-view hidden-view"><pre class="m-0 h-full"><code class="language-python p-6 block text-xs">${normalized.py}</code></pre></div>
                     </div>
                 </div>`;
             container.appendChild(section);
@@ -288,7 +309,7 @@
             menuLink.dataset.index = index;
             menuLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                document.getElementById(`feature-${index}`).scrollIntoView({ behavior: 'smooth' });
+                document.getElementById(`feature-${index}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
                 closeMenu();
             });
             featuresMenu.appendChild(menuLink);
@@ -309,39 +330,59 @@
         closeMenuBtn.addEventListener('click', closeMenu);
         menuBackdrop.addEventListener('click', closeMenu);
 
-        // Scroll spy for menu
-        const observer = new IntersectionObserver((entries) => {
-            let closestFeature = null;
-            let closestDistance = Infinity;
-            
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const rect = entry.target.getBoundingClientRect();
-                    const distance = Math.abs(rect.top - window.innerHeight / 2);
-                    
-                    if (distance < closestDistance) {
-                        closestDistance = distance;
-                        closestFeature = entry.target;
-                    }
-                }
-            });
-            
-            if (closestFeature) {
-                const index = closestFeature.id.split('-')[1];
-                document.querySelectorAll('.feature-menu-link').forEach(link => {
-                    if (link.dataset.index === index) {
-                        link.classList.add('active');
-                    } else {
-                        link.classList.remove('active');
-                    }
-                });
-            }
-        }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
-
-        // Observe all feature sections
-        document.querySelectorAll('[id^="feature-"]').forEach(section => {
-            observer.observe(section);
-        });
+		// Scroll spy for menu — REPLACEMENT (paste in place of the original observer block)
+		let lastClosestIndex = null;
+		
+		const observer = new IntersectionObserver(() => {
+		    const centerY = window.innerHeight / 2;
+		    const sections = Array.from(document.querySelectorAll('[id^="feature-"]'));
+		
+		    let overlapping = null;
+		    let closest = null;
+		    let closestDistance = Infinity;
+		
+		    sections.forEach(section => {
+		        const rect = section.getBoundingClientRect();
+		        const index = section.id.split('-')[1];
+		
+		        // If section overlaps the vertical center line, prefer it.
+		        if (rect.top <= centerY && rect.bottom >= centerY) {
+		            overlapping = section;
+		        }
+		
+		        // Compute distance from section's midpoint to centerY for closeness fallback
+		        const mid = (rect.top + rect.bottom) / 2;
+		        const distance = Math.abs(mid - centerY);
+		        if (distance < closestDistance) {
+		            closestDistance = distance;
+		            closest = section;
+		        }
+		    });
+		
+		    // choose overlapping if present; otherwise choose closest; otherwise fall back to lastClosestIndex
+		    let pick = overlapping || closest;
+		    if (!pick && lastClosestIndex !== null) {
+		        pick = document.getElementById(`feature-${lastClosestIndex}`);
+		    }
+		
+		    if (pick) {
+		        const index = pick.id.split('-')[1];
+		        lastClosestIndex = index; // remember for fallback
+		
+		        document.querySelectorAll('.feature-menu-link').forEach(link => {
+		            if (link.dataset.index === index) {
+		                link.classList.add('active');
+		            } else {
+		                link.classList.remove('active');
+		            }
+		        });
+		    }
+		}, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+		
+		// Observe all feature sections (same as before)
+		document.querySelectorAll('[id^="feature-"]').forEach(section => {
+		    observer.observe(section);
+		});
 
         // Adjust code container heights after highlighting
         setTimeout(() => {
