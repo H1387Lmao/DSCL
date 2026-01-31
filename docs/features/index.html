@@ -8,14 +8,123 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
     <style>
         html { scroll-behavior: smooth; }
-        .code-container { display: grid; grid-template-columns: 1fr; background: #0d0e10; }
-        .code-view { grid-area: 1 / 1; transition: opacity 0.2s; }
+        .code-container { 
+            display: grid; 
+            grid-template-columns: 1fr; 
+            background: #0d0e10;
+            min-height: 200px;
+        }
+        .code-view { 
+            grid-area: 1 / 1; 
+            transition: opacity 0.2s;
+            min-height: 100%;
+        }
+        .code-view pre {
+            height: 100%;
+        }
         .hidden-view { opacity: 0; pointer-events: none; }
         #mobile-menu:not(.hidden) { animation: slideDown 0.2s ease-out; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Side menu styles */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 320px;
+            height: 100vh;
+            background: #1e2024;
+            border-left: 1px solid #374151;
+            transition: right 0.3s ease;
+            z-index: 100;
+            overflow-y: auto;
+        }
+        .side-menu.active {
+            right: 0;
+        }
+        .menu-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 99;
+        }
+        .menu-backdrop.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .menu-toggle-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            transition: transform 0.2s;
+            z-index: 98;
+        }
+        .menu-toggle-btn:hover {
+            transform: scale(1.1);
+        }
+        .feature-menu-link {
+            transition: all 0.2s ease;
+        }
+        .feature-menu-link.active {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #3b82f6;
+        }
+        
+        /* Syntax highlighting for descriptions - matching tokyo-night-dark theme */
+        .syntax-int { color: #ff9e64; } /* orange for numbers */
+        .syntax-ident { color: #eeeeee; } /* white for identifiers */
+        .syntax-op { color: #f7768e; } /* red for operators */
+        .syntax-call { color: #e0af68; } /* yellow for function calls */
+        .syntax-string { color: #9ece6a; } /* green for strings */
+        .syntax-keyword { color: #bb9af7; } /* purple for keywords */
+        .syntax-special { color: #7dcfff; } /* cyan for special words */
     </style>
 </head>
 <body class="bg-[#1a1c1e] text-gray-200 font-sans">
+
+    <!-- Menu Toggle Button -->
+    <div class="menu-toggle-btn" id="menu-toggle-btn">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+        </svg>
+    </div>
+
+    <!-- Menu Backdrop -->
+    <div class="menu-backdrop" id="menu-backdrop"></div>
+
+    <!-- Side Menu -->
+    <div class="side-menu" id="side-menu">
+        <div class="p-6 border-b border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-white">Features</h3>
+                <button id="close-menu" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <p class="text-xs text-gray-500">Navigate through DSCL features</p>
+        </div>
+        <div id="features-menu" class="py-2">
+            <!-- Feature links will be dynamically inserted here -->
+        </div>
+    </div>
 
     <header class="bg-[#1a1c1e] border-b border-gray-800 sticky top-0 z-50">
         <nav class="flex justify-between items-center px-8 py-6 max-w-6xl mx-auto">
@@ -28,7 +137,7 @@
                 <a href="../play" class="text-sm font-medium hover:text-yellow-400 transition">Playground</a>
                 <a href="https://github.com/H1387Lmao/DSCL" class="text-sm font-bold border border-gray-700 px-3 py-1 rounded-md">GitHub</a>
             </div>
-            <button id="menu-toggle" class="md:hidden text-white"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></button>
+            <button id="mobile-menu-toggle" class="md:hidden text-white"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg></button>
         </nav>
         <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-[#1e2024] p-6 space-y-4 border-b border-gray-800">
             <a href="../index.html" class="block text-gray-300">Home</a>
@@ -46,13 +155,113 @@
     <script src="features.js"></script>
     <script>
         const container = document.getElementById('features-container');
+        const featuresMenu = document.getElementById('features-menu');
+        const sideMenu = document.getElementById('side-menu');
+        const menuBackdrop = document.getElementById('menu-backdrop');
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
+        const closeMenuBtn = document.getElementById('close-menu');
+
+        // Syntax highlighting function for descriptions
+        function highlightDescription(text) {
+            return text.replace(/`([^`]+)`/g, (match, code) => {
+                // Parse and highlight the code
+                const parts = [];
+                let i = 0;
+                
+                while (i < code.length) {
+                    let matched = false;
+                    
+                    // Check for strings
+                    if (code[i] === '"') {
+                        let j = i + 1;
+                        while (j < code.length && code[j] !== '"') j++;
+                        parts.push({ type: 'string', value: code.substring(i, j + 1) });
+                        i = j + 1;
+                        matched = true;
+                    }
+                    else if (code[i] === "'") {
+                        let j = i + 1;
+                        while (j < code.length && code[j] !== "'") j++;
+                        parts.push({ type: 'string', value: code.substring(i, j + 1) });
+                        i = j + 1;
+                        matched = true;
+                    }
+                    // Check for numbers
+                    else if (/\d/.test(code[i])) {
+                        let j = i;
+                        while (j < code.length && /[\d.]/.test(code[j])) j++;
+                        parts.push({ type: 'int', value: code.substring(i, j) });
+                        i = j;
+                        matched = true;
+                    }
+                    // Check for identifiers and keywords
+                    else if (/[a-zA-Z_]/.test(code[i])) {
+                        let j = i;
+                        while (j < code.length && /[a-zA-Z0-9_]/.test(code[j])) j++;
+                        const word = code.substring(i, j);
+                        
+                        // Check if it's a keyword
+                        const keywords = ['cmd','fn','async', 'await', 'User', 'String', 'Number', 'Context', 'const', 'mut', 'new', 'use', 'pkg', 'if', 'elseif', 'else', 'while', 'for', 'to', 'in', 'def'];
+                        const specials = ['ctx', 'this', 'respond', 'print', 'time', 'random'];
+                        // Check if next non-space character is (
+                        let k = j;
+                        while (k < code.length && code[k] === ' ') k++;
+                        const isCall = code[k] === '(';
+                        
+                        if (keywords.includes(word)) {
+                            parts.push({ type: 'keyword', value: word });
+                        } else if (specials.includes(word)){
+                            parts.push({ type: 'special', value: word });
+                        } else if (isCall || /^[A-Z]/.test(word)) {
+                            parts.push({ type: 'call', value: word });
+                        } else {
+                            parts.push({ type: 'ident', value: word });
+                        }
+                        i = j;
+                        matched = true;
+                    }
+                    // Check for operators
+                    else if (/[+\-*/%=<>!&|:.,]/.test(code[i])) {
+                        let j = i;
+                        while (j < code.length && /[+\-*/%=<>!&|^~:.]/.test(code[j])) j++;
+                        parts.push({ type: 'op', value: code.substring(i, j) });
+                        i = j;
+                        matched = true;
+                    }
+                    
+                    if (!matched) {
+                        parts.push({ type: 'text', value: code[i] });
+                        i++;
+                    }
+                }
+                
+                // Build HTML from parts
+                let html = '';
+                for (const part of parts) {
+                    if (part.type === 'text') {
+                        html += part.value;
+                    } else {
+                        html += `<span class="syntax-${part.type}">${part.value}</span>`;
+                    }
+                }
+                
+                return `<code class="text-xs px-1.5 py-0.5 rounded bg-gray-800">${html}</code>`;
+            });
+        }
+
+        // Build features sections and menu
         features.forEach((feature, index) => {
+            // Create feature section
             const section = document.createElement('div');
+            section.id = `feature-${index}`;
             section.className = "grid md:grid-cols-2 gap-8 py-12 border-b border-gray-800 last:border-0";
+            
+            const highlightedDesc = highlightDescription(feature.description);
+            
             section.innerHTML = `
                 <div>
                     <h3 class="text-xl font-bold text-white mb-4">${feature.title}</h3>
-                    <p class="text-gray-400 text-sm leading-relaxed">${feature.description}</p>
+                    <p class="text-gray-400 text-sm leading-relaxed">${highlightedDesc}</p>
                 </div>
                 <div class="rounded-lg overflow-hidden border border-gray-800 bg-[#0d0e10]">
                     <div class="flex items-center justify-between px-4 py-2 bg-[#1e2024] border-b border-gray-800">
@@ -64,18 +273,96 @@
                             <svg id="copy-${index}" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>
                         </button>
                     </div>
-                    <div class="code-container">
-                        <pre id="dscl-${index}" class="code-view m-0"><code class="language-rust p-6 block text-xs">${feature.dscl}</code></pre>
-                        <pre id="py-${index}" class="code-view hidden-view m-0"><code class="language-python p-6 block text-xs">${feature.python}</code></pre>
+                    <div class="code-container" id="code-container-${index}">
+                        <div id="dscl-${index}" class="code-view"><pre class="m-0 h-full"><code class="language-rust p-6 block text-xs">${feature.dscl}</code></pre></div>
+                        <div id="py-${index}" class="code-view hidden-view"><pre class="m-0 h-full"><code class="language-python p-6 block text-xs">${feature.python}</code></pre></div>
                     </div>
                 </div>`;
             container.appendChild(section);
+            
+            // Create menu link
+            const menuLink = document.createElement('a');
+            menuLink.href = `#feature-${index}`;
+            menuLink.className = 'feature-menu-link block px-6 py-3 text-sm text-gray-300 hover:bg-gray-800 transition';
+            menuLink.textContent = feature.title;
+            menuLink.dataset.index = index;
+            menuLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById(`feature-${index}`).scrollIntoView({ behavior: 'smooth' });
+                closeMenu();
+            });
+            featuresMenu.appendChild(menuLink);
         });
+
+        // Menu controls
+        function openMenu() {
+            sideMenu.classList.add('active');
+            menuBackdrop.classList.add('active');
+        }
+
+        function closeMenu() {
+            sideMenu.classList.remove('active');
+            menuBackdrop.classList.remove('active');
+        }
+
+        menuToggleBtn.addEventListener('click', openMenu);
+        closeMenuBtn.addEventListener('click', closeMenu);
+        menuBackdrop.addEventListener('click', closeMenu);
+
+        // Scroll spy for menu
+        const observer = new IntersectionObserver((entries) => {
+            let closestFeature = null;
+            let closestDistance = Infinity;
+            
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const rect = entry.target.getBoundingClientRect();
+                    const distance = Math.abs(rect.top - window.innerHeight / 2);
+                    
+                    if (distance < closestDistance) {
+                        closestDistance = distance;
+                        closestFeature = entry.target;
+                    }
+                }
+            });
+            
+            if (closestFeature) {
+                const index = closestFeature.id.split('-')[1];
+                document.querySelectorAll('.feature-menu-link').forEach(link => {
+                    if (link.dataset.index === index) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+        }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+
+        // Observe all feature sections
+        document.querySelectorAll('[id^="feature-"]').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Adjust code container heights after highlighting
+        setTimeout(() => {
+            features.forEach((feature, index) => {
+                const dsclEl = document.querySelector(`#dscl-${index} code`);
+                const pyEl = document.querySelector(`#py-${index} code`);
+                const container = document.getElementById(`code-container-${index}`);
+                
+                if (dsclEl && pyEl && container) {
+                    const dsclHeight = dsclEl.scrollHeight;
+                    const pyHeight = pyEl.scrollHeight;
+                    const maxHeight = Math.max(dsclHeight, pyHeight);
+                    container.style.minHeight = maxHeight + 'px';
+                }
+            });
+        }, 100);
 
         window.toggleCode = (i, type) => {
             const dscl = document.getElementById(`dscl-${i}`), py = document.getElementById(`py-${i}`);
             const bD = document.getElementById(`btn-dscl-${i}`), bP = document.getElementById(`btn-py-${i}`);
-            if(type === 'dscl') { 
+            if(type === 'dscl') {
                 dscl.classList.remove('hidden-view'); py.classList.add('hidden-view');
                 bD.className = "text-[10px] font-bold px-2 py-1 rounded bg-blue-600 text-white";
                 bP.className = "text-[10px] font-bold px-2 py-1 rounded text-gray-500";
@@ -91,7 +378,7 @@
             navigator.clipboard.writeText(document.getElementById(active).textContent);
         };
 
-        document.getElementById('menu-toggle').onclick = () => document.getElementById('mobile-menu').classList.toggle('hidden');
+        document.getElementById('mobile-menu-toggle').onclick = () => document.getElementById('mobile-menu').classList.toggle('hidden');
         hljs.highlightAll();
     </script>
 </body>

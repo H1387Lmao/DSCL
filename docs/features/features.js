@@ -9,7 +9,7 @@ const features = [
         title: "Conditional Logic",
         description: "DSCL supports `if`, `elseif`, and `else` blocks for flow control, using a clean brace-based syntax.",
         dscl: `if i == 67 {\n    print("SIX SEVENNNN")\n} elseif i == 21 {\n    print("9+10")\n} else {\n    print(i)\n}`,
-        python: `if i == 67:\n    print("SIX SEVENNNN")\nelif i == 21:\n    print("9+10")\nelse:\n    print(i)`
+        python: `if i == 67:\n    print("SIX SEVENNNN")\nelif i == 21:\n    print("9+10")\nelse:\n    print(i)\n`
     },
     {
         title: "Variables & Math",
@@ -21,13 +21,13 @@ const features = [
         title: "Loops (For & While)",
         description: "Iterate through ranges with `to` or use `while` loops for conditional repetition.",
         dscl: `for i: 1 to 100 {\n    print(i)\n}\n\nwhile b != 0 {\n    b = b - 1\n}`,
-        python: `for i in range(1, 100):\n    print(i)\n\nwhile b != 0:\n    b -= 1`
+        python: `for i in range(1, 100):\n    print(i)\n\nwhile b != 0:\n    b -= 1\n\n`
     },
     {
         title: "Asynchronous Functions",
         description: "Define non-blocking logic using `async fn`. Use the `await` keyword to handle promises.",
         dscl: `async fn test_async() {\n    print("hello!")\n}\n\nawait test_async()`,
-        python: `async def test_async():\n    print("hello!")\n\nawait test_async()`
+        python: `async def test_async():\n    print("hello!")\n\nawait test_async()\n`
     },
     {
         title: "Lambda Functions",
